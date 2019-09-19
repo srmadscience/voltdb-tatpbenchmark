@@ -32,11 +32,10 @@ import org.voltdb.voltutil.stats.SafeHistogramCache;
 public class BaseMPCallback extends AbstactCallback implements AllPartitionProcedureCallback {
 
     boolean lastCallInChain = true;
-    SafeHistogramCache histCache = SafeHistogramCache.getInstance();
 
-    public BaseMPCallback(long startTime, long startTimeNanos, int sid, SafeHistogramCache h,
+    public BaseMPCallback(long startTime, long startTimeNanos, int sid,
 			String callbackStatsCategory, Client theClient,  boolean lastCallInChain) {
-		super(startTime, startTimeNanos, sid, h, callbackStatsCategory, theClient);
+		super(startTime, startTimeNanos, sid, callbackStatsCategory, theClient);
 		this.lastCallInChain = lastCallInChain;
 	
 	}
@@ -48,16 +47,13 @@ public class BaseMPCallback extends AbstactCallback implements AllPartitionProce
 		// Make sure the procedure succeeded.
 		if (response[i].response.getStatus() != ClientResponse.SUCCESS) {
 
-			//System.out.println("VoltDB Asynchronous stored procedure failed. Res: " + response[i].response.getStatus() + " "
-			//		+ response[i].response.getStatusString());
-
-			h.reportLatency(callbackStatsCategory + "_FAIL_MS", startTime, response[i].response.getStatusString(),
+			histCache.reportLatency(callbackStatsCategory + "_FAIL_MS", startTime, response[i].response.getStatusString(),
 					MILLISECOND_STATS_SIZE);
 			 histCache.incCounter("ERROR");
 		} else {
 
             if (lastCallInChain) {
-                h.reportLatency(callbackStatsCategory + "_WALL_MILLIS", startTime, response[i].response.getStatusString(),
+              histCache.reportLatency(callbackStatsCategory + "_WALL_MILLIS", startTime, response[i].response.getStatusString(),
                         MILLISECOND_STATS_SIZE);                
             }
 
@@ -66,24 +62,24 @@ public class BaseMPCallback extends AbstactCallback implements AllPartitionProce
 				micros = micros / 1000;
 
 				if (micros >= MICROSECOND_STATS_SIZE) {
-					h.reportLatency(callbackStatsCategory + "_LATE_MS", startTime, response[i].response.getStatusString(),
+				  histCache.reportLatency(callbackStatsCategory + "_LATE_MS", startTime, response[i].response.getStatusString(),
 							MILLISECOND_STATS_SIZE);
 				} else {
-					h.report(callbackStatsCategory + "_JVM_MICROS", (int) micros, response[i].response.getStatusString(),
+				  histCache.report(callbackStatsCategory + "_JVM_MICROS", (int) micros, response[i].response.getStatusString(),
 							MICROSECOND_STATS_SIZE);
 				}
 			}
 
-			h.report(callbackStatsCategory + "_VOLT_CLIENT_MS", response[i].response.getClientRoundtrip(), null,
+            histCache.report(callbackStatsCategory + "_VOLT_CLIENT_MS", response[i].response.getClientRoundtrip(), null,
 					MILLISECOND_STATS_SIZE);
 			
 			long clientMicros = response[i].response.getClientRoundtripNanos();
 			clientMicros = clientMicros / 1000;
 
-			h.report(callbackStatsCategory + "_VOLT_CLIENT_MICROS", (int)clientMicros, null,
+			histCache.report(callbackStatsCategory + "_VOLT_CLIENT_MICROS", (int)clientMicros, null,
 					MICROSECOND_STATS_SIZE);
 
-			h.report(callbackStatsCategory + "_VOLT_CLUSTER_MS", response[i].response.getClusterRoundtrip(), null,
+			histCache.report(callbackStatsCategory + "_VOLT_CLUSTER_MS", response[i].response.getClusterRoundtrip(), null,
 					MILLISECOND_STATS_SIZE);
 
 		}

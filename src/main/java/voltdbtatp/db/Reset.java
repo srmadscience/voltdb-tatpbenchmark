@@ -41,8 +41,6 @@ public class Reset extends VoltProcedure {
 		voltQueueSQL(d3);
 		voltQueueSQL(d4);
 
-		// Return control - 'true' tells the C++ core this is our last
-		// interqction
 		return voltExecuteSQL(true);
 	}
 

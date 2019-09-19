@@ -43,8 +43,6 @@ public class VoltProcedureUpdateCallBack implements ProcedureCallback {
 			} else {
 
 			    histCache.incCounter("ERROR");
-
-
 			}
 
 		}

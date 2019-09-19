@@ -30,17 +30,15 @@ import org.voltdb.VoltTable;
 
 public class UpdateSubscriberData extends VoltProcedure {
 
-	public static final SQLStmt firstSelect = new SQLStmt("UPDATE Subscriber SET bit_1 = ? WHERE s_id = ?;");
-	public static final SQLStmt x = new SQLStmt("UPDATE Special_Facility SET data_a = ? WHERE s_id = ? AND sf_type = ?;");
+	public static final SQLStmt updateSub = new SQLStmt("UPDATE Subscriber SET bit_1 = ? WHERE s_id = ?;");
+	public static final SQLStmt updateSF = new SQLStmt("UPDATE Special_Facility SET data_a = ? WHERE s_id = ? AND sf_type = ?;");
      
 
 	public VoltTable[] run(long subscriberId, long bit1, long dataA, long sfType) throws VoltAbortException {
 
-		voltQueueSQL(firstSelect, bit1, subscriberId);
-		voltQueueSQL(x, dataA, subscriberId, sfType);
+		voltQueueSQL(updateSub, bit1, subscriberId);
+		voltQueueSQL(updateSF, dataA, subscriberId, sfType);
 
-		// Return control - 'true' tells the C++ core this is our last
-		// interqction
 		return voltExecuteSQL(true);
 	}
 

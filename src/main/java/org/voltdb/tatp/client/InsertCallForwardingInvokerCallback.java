@@ -37,10 +37,10 @@ public class InsertCallForwardingInvokerCallback extends BaseCallback {
 
 	
 	
-	public InsertCallForwardingInvokerCallback(long startTime, long startTimeNanos,  int sid, SafeHistogramCache h,
+	public InsertCallForwardingInvokerCallback(long startTime, long startTimeNanos,  int sid, 
 			String callbackStatsCategory, Client c, int randomBit, int randomData, int randomSfType) {
 
-		super(startTime, startTimeNanos, sid, h, callbackStatsCategory, c, false);
+		super(startTime, startTimeNanos, sid, callbackStatsCategory, c, false);
 		this.randomBit = randomBit;
 		this.randomData = randomData;
 		this.randomSfType = randomSfType;
@@ -53,7 +53,7 @@ public class InsertCallForwardingInvokerCallback extends BaseCallback {
 		super.clientCallback(response);
 
 		int sid = getSid(response);
-		BaseCallback c2  = new BaseCallback(startTime, startTimeNanos, sid, h, callbackStatsCategory + "_2", theClient, true);
+		BaseCallback c2  = new BaseCallback(startTime, startTimeNanos, sid, callbackStatsCategory + "_2", theClient, true);
 
 		try {
 			theClient.callProcedure(c2, "InsertCallForwarding", sid, randomBit, randomData, randomSfType);

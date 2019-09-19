@@ -29,15 +29,13 @@ import org.voltdb.VoltTable;
 
 public class UpdateLocation extends VoltProcedure {
 
-	public static final SQLStmt firstSelect = new SQLStmt(
+	public static final SQLStmt updateSub = new SQLStmt(
 			"UPDATE Subscriber SET vlr_location = ? WHERE s_id = ?;");
 
 	public VoltTable[] run(long subscriberId, long locationId) throws VoltAbortException {
 
-		voltQueueSQL(firstSelect, locationId, subscriberId);
+		voltQueueSQL(updateSub, locationId, subscriberId);
 
-		// Return control - 'true' tells the C++ core this is our last
-		// interqction
 		return voltExecuteSQL(true);
 	}
 

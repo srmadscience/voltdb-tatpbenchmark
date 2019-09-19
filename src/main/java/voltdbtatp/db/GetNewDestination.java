@@ -40,11 +40,11 @@ public class GetNewDestination extends VoltProcedure {
          + "AND addCallForwarding.start_time <= ? "
          + "AND ? < addCallForwarding.end_time;");
      
-	public VoltTable[] run(long subscriberId, long sfType, long st, long ed) throws VoltAbortException {
+  public VoltTable[] run(long subscriberId, long sfType, long st, long ed) throws VoltAbortException {
 
-		voltQueueSQL(getNewDestSelect, subscriberId,sfType,st,ed);
+    voltQueueSQL(getNewDestSelect, subscriberId, sfType, st, ed);
 
-		return voltExecuteSQL(true);
-	}
+    return voltExecuteSQL(true);
+  }
 
 }

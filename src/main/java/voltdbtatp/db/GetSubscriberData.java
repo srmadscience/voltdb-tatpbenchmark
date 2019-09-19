@@ -43,13 +43,11 @@ public class GetSubscriberData extends VoltProcedure {
      +"WHERE s_id = ?;");
      
 
-	public VoltTable[] run(long subscriberId) throws VoltAbortException {
+  public VoltTable[] run(long subscriberId) throws VoltAbortException {
 
-		voltQueueSQL(firstSelect, subscriberId);
+    voltQueueSQL(firstSelect, subscriberId);
 
-		// Return control - 'true' tells the C++ core this is our last
-		// Interaction
-		return voltExecuteSQL(true);
-	}
+    return voltExecuteSQL(true);
+  }
 
 }

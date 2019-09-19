@@ -32,6 +32,7 @@ import com.jezhumble.javasysmon.JavaSysMon;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Random;
 
@@ -61,9 +62,9 @@ public class TatpClient implements Runnable {
   public static final int DELETE_CALL_FORWARDING = 6;
 
   // How we're handling FK lookups
-  public static final int FKMODE_ALL_PARTITIONS = 0;
-  public static final int FKMODE_MAT_VIEW = 1;
-  public static final int FKMODE_MULTI_QUERY = 2;
+  public static final int FKMODE_QUERY_ALL_PARTITIONS_FIRST = 0;
+  public static final int FKMODE_TASK_ALL_PARTITIONS = 1;
+  public static final int FKMODE_MULTI_QUERY_FIRST = 2;
 
   // How long we wait between passes
   private static final long DELAY_SECONDS = 5;
@@ -86,12 +87,16 @@ public class TatpClient implements Runnable {
           + "      byte2_6 SMALLINT, byte2_7 SMALLINT, byte2_8 SMALLINT, byte2_9 SMALLINT, byte2_10 SMALLINT, "
           + "      msc_location BIGINT, vlr_location BIGINT);"
 
-      , "create index sub_idx on subscriber(sub_nbr);", "PARTITION TABLE subscriber ON COLUMN s_id;",
-      "create view sub_nbr_to_sub_map as " + "select s_id, count(*) how_many, min(sub_nbr) sub_nbr "
-          + "from subscriber  " + "group by s_id;",
-
-      "create index map_idx on sub_nbr_to_sub_map(sub_nbr);",
-      "CREATE TABLE access_info " + "      (s_id BIGINT NOT NULL, ai_type TINYINT NOT NULL, "
+       , "PARTITION TABLE subscriber ON COLUMN s_id;"
+      
+       , "create ASSUMEUNIQUE index sub_idx on subscriber(sub_nbr);"
+       
+//,     "create view sub_nbr_to_sub_map as " + "select s_id, count(*) how_many, min(sub_nbr) sub_nbr "
+//          + "from subscriber  " + "group by s_id;",
+//
+//      "create index map_idx on sub_nbr_to_sub_map(sub_nbr);",
+      
+     , "CREATE TABLE access_info " + "      (s_id BIGINT NOT NULL, ai_type TINYINT NOT NULL, "
           + "      data1 SMALLINT, data2 SMALLINT, data3 VARCHAR(3), data4 VARCHAR(5), "
           + "      PRIMARY KEY (s_id, ai_type), " + "      FOREIGN KEY (s_id) REFERENCES subscriber (s_id));",
       "PARTITION TABLE access_info ON COLUMN s_id;",
@@ -129,15 +134,19 @@ public class TatpClient implements Runnable {
 
       , "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.UpdateSubscriberData;"
 
-      , "CREATE PROCEDURE FROM CLASS voltdbtatp.db.MapSubStringToNumber;",
-      "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.MapSubStringToNumberAllPartitions; "
+      ,
+      "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id "
+      + "FROM CLASS voltdbtatp.db.MapSubStringToNumberAllPartitions; "
 
       , "CREATE PROCEDURE FROM CLASS voltdbtatp.db.MapSubStringToNumberNoView;"
 
-      , "CREATE PROCEDURE FROM CLASS voltdbtatp.db.MapManySubStringToNumber;"
+      , "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.UpdateLocationMultiPartition;"
 
       ,
-      "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.MapManySubStringToNumberNoView;" };
+      "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.InsertCallForwardingMultiPartition;"
+      ,
+      "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.DeleteCallForwardingMultiPartition;"
+      };
 
   // We only create the DDL and procedures if a call to testProcName with
   // testParams fails....
@@ -163,7 +172,7 @@ public class TatpClient implements Runnable {
   long txnCount = 0;
   long startTime = 0;
   int size = 0;
-  int fkMode = FKMODE_MAT_VIEW;
+  int fkMode = FKMODE_TASK_ALL_PARTITIONS;
   long lastStatsTime = System.currentTimeMillis();
   final int statsIntervalMs = 5000;
   int timeInSeconds;
@@ -188,7 +197,7 @@ public class TatpClient implements Runnable {
    * @param size
    *          How many rows of test data
    * @param fkMode
-   *          FKMODE_ALL_PARTITIONS, FKMODE_MAT_VIEW or FKMODE_MULTI_QUERY
+   *          FKMODE_QUERY_ALL_PARTITIONS_FIRST, FKMODE_TASK_ALL_PARTITIONS or FKMODE_MULTI_QUERY_FIRST
    * @param clientId
    *          id
    */
@@ -212,8 +221,7 @@ public class TatpClient implements Runnable {
       statsClient = connectVoltDB(hostnames, fkMode);
 
     } catch (Exception e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      logger.error(e.getMessage());
     }
 
   }
@@ -536,14 +544,14 @@ public class TatpClient implements Runnable {
       switch (txnType) {
       case GET_SUBSCRIBER_DATA:
 
-        theCallback = new BaseCallback(START_TIME, START_TIME_NANOS, sid, h, "GET_SUBSCRIBER_DATA", callbackClient,
+        theCallback = new BaseCallback(START_TIME, START_TIME_NANOS, sid, "GET_SUBSCRIBER_DATA", callbackClient,
             true);
         client.callProcedure(theCallback, "GetSubscriberData", sid);
 
         break;
 
       case GET_NEW_DESTINATION:
-        theCallback = new BaseCallback(START_TIME, START_TIME_NANOS, sid, h, "GET_NEW_DESTINATION", callbackClient,
+        theCallback = new BaseCallback(START_TIME, START_TIME_NANOS, sid, "GET_NEW_DESTINATION", callbackClient,
             true);
 
         long st = getStartTime();
@@ -554,14 +562,14 @@ public class TatpClient implements Runnable {
 
       case GET_ACCESS_DATA:
 
-        theCallback = new BaseCallback(START_TIME, START_TIME_NANOS, sid, h, "GET_ACCESS_DATA", callbackClient, true);
+        theCallback = new BaseCallback(START_TIME, START_TIME_NANOS, sid,  "GET_ACCESS_DATA", callbackClient, true);
         client.callProcedure(theCallback, "GetAccessData", sid, getRandomAiType());
 
         break;
 
       case UPDATE_SUBSCRIBER_DATA:
 
-        theCallback = new BaseCallback(START_TIME, START_TIME_NANOS, sid, h, "UPDATE_SUBSCRIBER_DATA", callbackClient,
+        theCallback = new BaseCallback(START_TIME, START_TIME_NANOS, sid,  "UPDATE_SUBSCRIBER_DATA", callbackClient,
             true);
         client.callProcedure(theCallback, "UpdateSubscriberData", sid, getRandomBit(), getRandomDataA(),
             getRandomSfType());
@@ -572,28 +580,34 @@ public class TatpClient implements Runnable {
 
         // Depending on how we are going to handle the FK issue we do different things.
         //
-        // FKMODE_ALL_PARTITIONS sends a request to each partition to try and map the FK id to a 
+        // FKMODE_QUERY_ALL_PARTITIONS_FIRST sends a request to each partition to try and map the FK id to a 
         // subscriber id. The callback listens for responses and reacts to the first (and 
         // hopefully *only* valid one.
         //
-        // FKMODE_MULTI_QUERY does a global read to map the FK to an ID and then creates a new callback
+        // FKMODE_TASK_ALL_PARTITIONS asks all the partitions to do the update, and then checks that one and 
+        // only one did.
+        //
+        // FKMODE_MULTI_QUERY_FIRST does a global read to map the FK to an ID and then creates a new callback
         // to do the work when it has a valid ID.
-        if (fkMode == FKMODE_ALL_PARTITIONS) {
-          theMPCallback = new UpdateLocationInvokerCallbackNoView(START_TIME, START_TIME_NANOS, sid, h,
+        
+        if (fkMode == FKMODE_QUERY_ALL_PARTITIONS_FIRST) {
+          theMPCallback = new UpdateLocationInvokerCallbackNoView(START_TIME, START_TIME_NANOS, sid, 
               "UPDATE_LOCATION", getRandomLocation(), callbackClient);
 
           client.callAllPartitionProcedure(theMPCallback, "MapSubStringToNumberAllPartitions", fkString);
 
-        } else if (fkMode == FKMODE_MAT_VIEW) {
+        } else if (fkMode == FKMODE_TASK_ALL_PARTITIONS) {
 
-          theCallback = new UpdateLocationInvokerCallback(START_TIME, START_TIME_NANOS, sid, h, "UPDATE_LOCATION",
-              getRandomLocation(), callbackClient);
+          theMPCallback = new GenericUpdateOneRowInAllPartitionsCallback(START_TIME, START_TIME_NANOS, sid,  "UPDATE_LOCATION_MP",
+              callbackClient);
 
-          client.callProcedure(theCallback, "MapSubStringToNumber", fkString);
+          client.callAllPartitionProcedure(theMPCallback, "UpdateLocationMultiPartition", fkString, getRandomLocation());
+         
+          
 
-        } else if (fkMode == FKMODE_MULTI_QUERY) {
+        } else if (fkMode == FKMODE_MULTI_QUERY_FIRST) {
 
-          theCallback = new UpdateLocationInvokerCallback(START_TIME, START_TIME_NANOS, sid, h, "UPDATE_LOCATION",
+          theCallback = new UpdateLocationInvokerCallback(START_TIME, START_TIME_NANOS, sid,  "UPDATE_LOCATION",
               getRandomLocation(), callbackClient);
 
           client.callProcedure(theCallback, "MapSubStringToNumberNoView", fkString);
@@ -603,19 +617,26 @@ public class TatpClient implements Runnable {
         break;
 
       case INSERT_CALL_FORWARDING:
-        if (fkMode == FKMODE_ALL_PARTITIONS) {
+        
+        if (fkMode == FKMODE_QUERY_ALL_PARTITIONS_FIRST) {
 
-          theMPCallback = new InsertCallForwardingInvokerCallbackNoView(START_TIME, START_TIME_NANOS, sid, h,
+          theMPCallback = new InsertCallForwardingInvokerCallbackNoView(START_TIME, START_TIME_NANOS, sid, 
               "INSERT_CALL_FORWARDING", callbackClient, getRandomBit(), getRandomDataA(), getRandomSfType());
           client.callAllPartitionProcedure(theMPCallback, "MapSubStringToNumberAllPartitions", fkString);
 
-        } else if (fkMode == FKMODE_MAT_VIEW) {
-          theCallback = new InsertCallForwardingInvokerCallback(START_TIME, START_TIME_NANOS, sid, h,
-              "INSERT_CALL_FORWARDING", callbackClient, getRandomBit(), getRandomDataA(), getRandomSfType());
-          client.callProcedure(theCallback, "MapSubStringToNumber", fkString);
+        } else if (fkMode == FKMODE_TASK_ALL_PARTITIONS) {
+          
+          
+          theMPCallback = new GenericUpdateOneRowInAllPartitionsCallback(START_TIME, START_TIME_NANOS, sid,  "INSERT_CALL_FORWARDING_MP",
+              callbackClient);
 
-        } else if (fkMode == FKMODE_MULTI_QUERY) {
-          theCallback = new InsertCallForwardingInvokerCallback(START_TIME, START_TIME_NANOS, sid, h,
+          client.callAllPartitionProcedure(theMPCallback, "InsertCallForwardingMultiPartition"
+              , fkString, getRandomBit(), getRandomDataA(), getRandomSfType());
+
+          
+
+        } else if (fkMode == FKMODE_MULTI_QUERY_FIRST) {
+          theCallback = new InsertCallForwardingInvokerCallback(START_TIME, START_TIME_NANOS, sid, 
               "INSERT_CALL_FORWARDING", callbackClient, getRandomBit(), getRandomDataA(), getRandomSfType());
           client.callProcedure(theCallback, "MapSubStringToNumberNoView", fkString);
 
@@ -624,21 +645,24 @@ public class TatpClient implements Runnable {
 
       case DELETE_CALL_FORWARDING:
 
-        if (fkMode == FKMODE_ALL_PARTITIONS) {
+        if (fkMode == FKMODE_QUERY_ALL_PARTITIONS_FIRST) {
 
-          theMPCallback = new DeleteCallForwardingInvokerCallbackNoView(START_TIME, START_TIME_NANOS, sid, h,
+          theMPCallback = new DeleteCallForwardingInvokerCallbackNoView(START_TIME, START_TIME_NANOS, sid, 
               "DELETE_CALL_FORWARDING", callbackClient, getStartTime(), getRandomSfType());
           client.callAllPartitionProcedure(theMPCallback, "MapSubStringToNumberAllPartitions", fkString);
 
-        } else if (fkMode == FKMODE_MAT_VIEW) {
+        } else if (fkMode == FKMODE_TASK_ALL_PARTITIONS) {
+          
+          theMPCallback = new GenericUpdateOneRowInAllPartitionsCallback(START_TIME, START_TIME_NANOS, sid,  "DELETE_CALL_FORWARDING_MP",
+              callbackClient);
 
-          theCallback = new DeleteCallForwardingInvokerCallback(START_TIME, START_TIME_NANOS, sid, h,
-              "DELETE_CALL_FORWARDING", callbackClient, getStartTime(), getRandomSfType());
-          client.callProcedure(theCallback, "MapSubStringToNumber", fkString);
+          client.callAllPartitionProcedure(theMPCallback, "DeleteCallForwardingMultiPartition"
+              , fkString, getStartTime(), getRandomSfType());
 
-        } else if (fkMode == FKMODE_MULTI_QUERY) {
 
-          theCallback = new DeleteCallForwardingInvokerCallback(START_TIME, START_TIME_NANOS, sid, h,
+        } else if (fkMode == FKMODE_MULTI_QUERY_FIRST) {
+
+          theCallback = new DeleteCallForwardingInvokerCallback(START_TIME, START_TIME_NANOS, sid, 
               "DELETE_CALL_FORWARDING", callbackClient, getStartTime(), getRandomSfType());
           client.callProcedure(theCallback, "MapSubStringToNumberNoView", fkString);
         }
@@ -956,6 +980,8 @@ public class TatpClient implements Runnable {
 
   public static void main(String[] args) {
 
+    msg("Parameters:" + Arrays.toString(args));
+
     final String testname = args[0];
     final String hostnames = args[1];
     long startTps = Integer.parseInt(args[2]);
@@ -983,7 +1009,7 @@ public class TatpClient implements Runnable {
             ccMakeData.createSchemaIfNeeded();
           } catch (Exception e) {
             logger.error(e.toString());
-            // TODO
+            System.exit(1);
 
           }
           ccMakeData.loadData(size);
@@ -1047,7 +1073,7 @@ public class TatpClient implements Runnable {
         }
 
         if (h.getCounter("ERROR") > 0) {
-          msg("Stopping...");
+          msg("Halting...");
           if (ok == null) {
             ok = "COD: Errors..." + h.getCounter("ERROR");
           }
@@ -1164,13 +1190,13 @@ public class TatpClient implements Runnable {
     String description = "";
 
     switch (fkMode) {
-    case FKMODE_ALL_PARTITIONS:
+    case FKMODE_QUERY_ALL_PARTITIONS_FIRST:
       description = "ALL_PARTITIONS";
       break;
-    case FKMODE_MAT_VIEW:
+    case FKMODE_TASK_ALL_PARTITIONS:
       description = "MAT_VIEW";
       break;
-    case FKMODE_MULTI_QUERY:
+    case FKMODE_MULTI_QUERY_FIRST:
       description = "MULTI_QUERY";
       break;
     }

@@ -27,16 +27,14 @@ import org.voltdb.SQLStmt;
 import org.voltdb.VoltProcedure;
 import org.voltdb.VoltTable;
 
-public class MapManySubStringToNumberNoView extends VoltProcedure {
+public class UpdateLocationMultiPartition extends VoltProcedure {
 
-	public static final SQLStmt theSelect = new SQLStmt("select s_id from subscriber where sub_nbr = ? order by s_id;");
+	public static final SQLStmt updateSub = new SQLStmt(
+			"UPDATE Subscriber SET vlr_location = ? WHERE sub_nbr = ?;");
 
-	public VoltTable[] run(long partitionKey, String[] subscriberIdStringArray) throws VoltAbortException {
+	public VoltTable[] run(long unusedPartitionId, String fk, long locationId) throws VoltAbortException {
 
-		for (int i=0; subscriberIdStringArray != null && i < subscriberIdStringArray.length; i++) {
-			voltQueueSQL(theSelect,subscriberIdStringArray[i]);
-		}
-		
+		voltQueueSQL(updateSub, locationId, fk);
 		return voltExecuteSQL(true);
 	}
 

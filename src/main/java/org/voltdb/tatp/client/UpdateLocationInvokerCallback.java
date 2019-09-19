@@ -33,10 +33,9 @@ public class UpdateLocationInvokerCallback extends BaseCallback {
 
 	long newLocation = 0;
 
-	public UpdateLocationInvokerCallback(long startTime, long startTimeNanos, int sid, SafeHistogramCache h, String callbackStatsCategory,
+	public UpdateLocationInvokerCallback(long startTime, long startTimeNanos, int sid,  String callbackStatsCategory,
 			long newLocation, Client c) {
-		//long startTime, int sid, SafeHistogramCache h, String callbackStatsCategory)
-		super(startTime,startTimeNanos,  sid, h, callbackStatsCategory, c,false);
+		super(startTime,startTimeNanos,  sid,  callbackStatsCategory, c,false);
 		this.newLocation = newLocation;
 		
 
@@ -49,7 +48,7 @@ public class UpdateLocationInvokerCallback extends BaseCallback {
 
 		int sid = getSid(response);
 		
-		BaseCallback c2 = new BaseCallback(startTime,startTimeNanos,  sid, h, callbackStatsCategory + "_2",theClient,true);
+		BaseCallback c2 = new BaseCallback(startTime,startTimeNanos,  sid, callbackStatsCategory + "_2",theClient,true);
 
 		try {
 			theClient.callProcedure(c2, "UpdateLocation", sid, newLocation);

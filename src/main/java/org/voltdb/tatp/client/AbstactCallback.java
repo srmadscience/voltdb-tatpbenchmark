@@ -36,16 +36,15 @@ public abstract class AbstactCallback  {
 	long startTime = 0;
 	long startTimeNanos = 0;
 	int sid = 0;
-	SafeHistogramCache h = null;
+	SafeHistogramCache histCache = SafeHistogramCache.getInstance();
 	String callbackStatsCategory = null;
 	Client theClient = null;
 
-	public AbstactCallback(long startTime, long startTimeNanos, int sid, SafeHistogramCache h,
+	public AbstactCallback(long startTime, long startTimeNanos, int sid,
 			String callbackStatsCategory, Client theClient) {
 		this.startTime = startTime;
 		this.startTimeNanos = startTimeNanos;
 		this.sid = sid;
-		this.h = h;
 		this.callbackStatsCategory = callbackStatsCategory;
 		this.theClient = theClient;
 

@@ -34,10 +34,10 @@ public class DeleteCallForwardingInvokerCallbackNoView extends BaseMPCallback {
 	long randomStartTime = 0;
 	int randomSfType = 0;
 
-	public DeleteCallForwardingInvokerCallbackNoView(long startTime, long startTimeNanos, int sid, SafeHistogramCache h,
+	public DeleteCallForwardingInvokerCallbackNoView(long startTime, long startTimeNanos, int sid, 
 			String callbackStatsCategory, Client c, long randomStartTime, int randomSfType) {
 
-		super(startTime, startTimeNanos, sid, h, callbackStatsCategory, c, false);
+		super(startTime, startTimeNanos, sid, callbackStatsCategory, c, false);
 		this.randomStartTime = randomStartTime;
 		this.randomSfType = randomSfType;
 
@@ -63,7 +63,7 @@ public class DeleteCallForwardingInvokerCallbackNoView extends BaseMPCallback {
 		}
 
 		if (sid > -1) {
-			BaseCallback c2 = new BaseCallback(startTime, startTimeNanos, sid, h, callbackStatsCategory + "_2",
+			BaseCallback c2 = new BaseCallback(startTime, startTimeNanos, sid, callbackStatsCategory + "_2",
 					theClient, true);
 			try {
 				theClient.callProcedure(c2, "DeleteCallForwarding", sid, randomSfType, randomStartTime);

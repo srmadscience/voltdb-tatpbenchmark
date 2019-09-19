@@ -33,11 +33,11 @@ public class UpdateLocationInvokerCallbackNoView extends BaseMPCallback {
 	
 	long newLocation = 0;
 
-	public UpdateLocationInvokerCallbackNoView(long startTime, long startTimeNanos, int sid, SafeHistogramCache h,
+	public UpdateLocationInvokerCallbackNoView(long startTime, long startTimeNanos, int sid, 
 			String callbackStatsCategory, long newLocation, Client c) {
 		// long startTime, int sid, SafeHistogramCache h, String
 		// callbackStatsCategory)
-		super(startTime, startTimeNanos, sid, h, callbackStatsCategory, c, false);
+		super(startTime, startTimeNanos, sid,  callbackStatsCategory, c, false);
 		this.newLocation = newLocation;
 
 	}
@@ -63,7 +63,7 @@ public class UpdateLocationInvokerCallbackNoView extends BaseMPCallback {
 
 		if (sid > -1) {
 
-			BaseCallback c2 = new BaseCallback(startTime, startTimeNanos, sid, h, callbackStatsCategory + "_2",
+			BaseCallback c2 = new BaseCallback(startTime, startTimeNanos, sid,  callbackStatsCategory + "_2",
 					theClient, true);
 
 			try {

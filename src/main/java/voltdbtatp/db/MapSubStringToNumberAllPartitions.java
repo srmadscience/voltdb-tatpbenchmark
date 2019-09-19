@@ -29,12 +29,12 @@ import org.voltdb.VoltTable;
 
 public class MapSubStringToNumberAllPartitions extends VoltProcedure {
 
-	public static final SQLStmt firstSelect = new SQLStmt(
+	public static final SQLStmt getId = new SQLStmt(
 			"select s_id from subscriber where sub_nbr = ? order by s_id;");
 	
 	public VoltTable[] run(long partitionKey, String subscriberIdString) throws VoltAbortException {
 
-		voltQueueSQL(firstSelect,subscriberIdString);
+		voltQueueSQL(getId,subscriberIdString);
 
 		return voltExecuteSQL(true);
 	}

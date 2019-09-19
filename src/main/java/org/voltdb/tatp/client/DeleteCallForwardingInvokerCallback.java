@@ -35,10 +35,10 @@ public class DeleteCallForwardingInvokerCallback extends BaseCallback {
 	long randomStartTime = 0;
 	int randomSfType = 0;
 
-	public DeleteCallForwardingInvokerCallback(long startTime, long startTimeNanos, int sid, SafeHistogramCache h,
+	public DeleteCallForwardingInvokerCallback(long startTime, long startTimeNanos, int sid,
 			String callbackStatsCategory, Client c,  long randomStartTime, int randomSfType) {
 
-		super(startTime, startTimeNanos,sid, h, callbackStatsCategory, c,false);
+		super(startTime, startTimeNanos,sid, callbackStatsCategory, c,false);
 		this.randomStartTime = randomStartTime;
 		this.randomSfType = randomSfType;
 
@@ -50,7 +50,7 @@ public class DeleteCallForwardingInvokerCallback extends BaseCallback {
 		super.clientCallback(response);
 
 		int sid = getSid(response);
-		BaseCallback c2 = new BaseCallback(startTime, startTimeNanos, sid, h, callbackStatsCategory + "_2",theClient,true);
+		BaseCallback c2 = new BaseCallback(startTime, startTimeNanos, sid, callbackStatsCategory + "_2",theClient,true);
 
 		try {
 			theClient.callProcedure(c2, "DeleteCallForwarding", sid, randomSfType,randomStartTime);
