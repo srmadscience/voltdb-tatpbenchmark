@@ -810,11 +810,7 @@ public class TatpClient implements Runnable {
 
   public static void msg(String message) {
 
-    SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    Date now = new Date();
-    String strDate = sdfDate.format(now);
-    System.out.println(strDate + ":" + message);
-    logger.info(strDate + ":" + message);
+    logger.info(message);
   }
 
   public static String mapTypeToString(int type) {
