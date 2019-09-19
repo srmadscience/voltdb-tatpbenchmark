@@ -30,23 +30,20 @@ import org.voltdb.VoltTable;
 
 public class GetNewDestination extends VoltProcedure {
 
-	public static final SQLStmt getNewDestSelect = new SQLStmt("SELECT sqlCallForwarding.numberx "
-         + " FROM Special_Facility AS sf, Call_Forwarding AS sqlCallForwarding "
+	public static final SQLStmt getNewDestSelect = new SQLStmt("SELECT addCallForwarding.numberx "
+         + " FROM Special_Facility AS sf, Call_Forwarding AS addCallForwarding "
          + "WHERE sf.s_id = ? "
          + "AND sf.sf_type = ? "
          + "AND sf.is_active = 1 "
-         + "AND sqlCallForwarding.s_id = sf.s_id "
-         + "AND sqlCallForwarding.sf_type = sf.sf_type "
-         + "AND sqlCallForwarding.start_time <= ? "
-         + "AND ? < sqlCallForwarding.end_time;");
+         + "AND addCallForwarding.s_id = sf.s_id "
+         + "AND addCallForwarding.sf_type = sf.sf_type "
+         + "AND addCallForwarding.start_time <= ? "
+         + "AND ? < addCallForwarding.end_time;");
      
-
 	public VoltTable[] run(long subscriberId, long sfType, long st, long ed) throws VoltAbortException {
 
 		voltQueueSQL(getNewDestSelect, subscriberId,sfType,st,ed);
 
-		// Return control - 'true' tells the C++ core this is our last
-		// Interaction
 		return voltExecuteSQL(true);
 	}
 

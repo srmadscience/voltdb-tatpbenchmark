@@ -36,8 +36,6 @@ public class MapSubStringToNumberAllPartitions extends VoltProcedure {
 
 		voltQueueSQL(firstSelect,subscriberIdString);
 
-		// Return control - 'true' tells the C++ core this is our last
-		// interqction
 		return voltExecuteSQL(true);
 	}
 

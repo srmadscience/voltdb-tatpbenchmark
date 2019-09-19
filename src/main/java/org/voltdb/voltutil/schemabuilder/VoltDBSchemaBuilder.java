@@ -74,6 +74,12 @@ public final class VoltDBSchemaBuilder {
     jarFiles = makeJarFiles(procStatements);
   }
 
+  /**
+   * Method to take an array of "CREATE PROCEDURE" statements and 
+   * return a list of the class files they are talking about.
+   * @param procStatements
+   * @return a list of the class files they are talking about.
+   */
   private String[] makeJarFiles(String[] procStatements) {
 
     ArrayList<String> jarFileAL = new ArrayList<String>();

@@ -36,8 +36,6 @@ public class GetAccessData extends VoltProcedure {
 
 		voltQueueSQL(accessDataSelect, subscriberId, aiType);
 
-		// Return control - 'true' tells the C++ core this is our last
-		// interqction
 		return voltExecuteSQL(true);
 	}
 

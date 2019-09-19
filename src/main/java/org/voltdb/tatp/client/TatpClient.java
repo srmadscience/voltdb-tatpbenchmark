@@ -67,14 +67,14 @@ public class TatpClient implements Runnable {
 
   // How long we wait between passes
   private static final long DELAY_SECONDS = 5;
-  
+
   // Max acceptable client CPU
   private static final int MAX_CPU_PCT = 80;
-  
+
   /**
-   * DDL statements for the VoltDB implementation of TATP. Note that you just run this
-   * using SQLCMD, but the make this implementation easier to re-create we do it 
-   * Programmatically.
+   * DDL statements for the VoltDB implementation of TATP. Note that you just
+   * run this using SQLCMD, but the make this implementation easier to re-create
+   * we do it Programmatically.
    */
   final String[] ddlStatements = {
       "CREATE TABLE subscriber " + "      (s_id BIGINT NOT NULL PRIMARY KEY, sub_nbr VARCHAR(15) NOT NULL , "
@@ -85,12 +85,11 @@ public class TatpClient implements Runnable {
           + "      byte2_1 SMALLINT, byte2_2 SMALLINT, byte2_3 SMALLINT, byte2_4 SMALLINT, byte2_5 SMALLINT, "
           + "      byte2_6 SMALLINT, byte2_7 SMALLINT, byte2_8 SMALLINT, byte2_9 SMALLINT, byte2_10 SMALLINT, "
           + "      msc_location BIGINT, vlr_location BIGINT);"
-         
-      ,"create index sub_idx on subscriber(sub_nbr);" 
-          ,"PARTITION TABLE subscriber ON COLUMN s_id;",
-      "create view sub_nbr_to_sub_map as "
-          + "select s_id, count(*) how_many, min(sub_nbr) sub_nbr " + "from subscriber  " + "group by s_id;",
-          
+
+      , "create index sub_idx on subscriber(sub_nbr);", "PARTITION TABLE subscriber ON COLUMN s_id;",
+      "create view sub_nbr_to_sub_map as " + "select s_id, count(*) how_many, min(sub_nbr) sub_nbr "
+          + "from subscriber  " + "group by s_id;",
+
       "create index map_idx on sub_nbr_to_sub_map(sub_nbr);",
       "CREATE TABLE access_info " + "      (s_id BIGINT NOT NULL, ai_type TINYINT NOT NULL, "
           + "      data1 SMALLINT, data2 SMALLINT, data3 VARCHAR(3), data4 VARCHAR(5), "
@@ -108,11 +107,11 @@ public class TatpClient implements Runnable {
       "PARTITION TABLE call_forwarding ON COLUMN s_id;" };
 
   /**
-   * Procedure statements for the VoltDB implementation of TATP. Note that you just run this
-   * using SQLCMD, but the make this implementation easier to re-create we do it 
-   * Programmatically.
+   * Procedure statements for the VoltDB implementation of TATP. Note that you
+   * just run this using SQLCMD, but the make this implementation easier to
+   * re-create we do it Programmatically.
    */
- final String[] procStatements = { "CREATE PROCEDURE FROM CLASS voltdbtatp.db.Reset;"
+  final String[] procStatements = { "CREATE PROCEDURE FROM CLASS voltdbtatp.db.Reset;"
 
       , "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.DeleteCallForwarding;"
 
@@ -130,8 +129,7 @@ public class TatpClient implements Runnable {
 
       , "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.UpdateSubscriberData;"
 
-      , "CREATE PROCEDURE FROM CLASS voltdbtatp.db.MapSubStringToNumber;"
-      ,
+      , "CREATE PROCEDURE FROM CLASS voltdbtatp.db.MapSubStringToNumber;",
       "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.MapSubStringToNumberAllPartitions; "
 
       , "CREATE PROCEDURE FROM CLASS voltdbtatp.db.MapSubStringToNumberNoView;"
@@ -141,18 +139,18 @@ public class TatpClient implements Runnable {
       ,
       "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.MapManySubStringToNumberNoView;" };
 
-  // We only create the DDL and procedures if a call to testProcName with testParams fails....
+  // We only create the DDL and procedures if a call to testProcName with
+  // testParams fails....
   final String testProcName = "GetSubscriberData";
   final Object[] testParams = { new Long(42) };
 
-  
   // We use three clients. You need a separate callback client
   // to avoid threading issues while interacting with the DB in a
   // callback.
   Client client = null;
   Client callbackClient = null;
   Client statsClient = null;
-  
+
   // Used to monitor client CPU load.
   JavaSysMon monitor = new JavaSysMon();
 
@@ -220,6 +218,14 @@ public class TatpClient implements Runnable {
 
   }
 
+  /**
+   * Get Number of rows in subscriber table.
+   * @param client
+   * @return Number of rows in subscriber.
+   * @throws IOException
+   * @throws NoConnectionsException
+   * @throws ProcCallException
+   */
   private static int getRecordCount(Client client) throws IOException, NoConnectionsException, ProcCallException {
     String sql = "select count(*) as cnt from subscriber;";
     VoltTable[] selectResults = null;
@@ -295,35 +301,38 @@ public class TatpClient implements Runnable {
 
           }
 
+          // Note that the insert is happening in the background...
           client.callProcedure(theCallback, "LoadSubscriber", subId, subIdString, bitArray[0], bitArray[1], bitArray[2],
               bitArray[3], bitArray[4], bitArray[5], bitArray[6], bitArray[7], bitArray[8], bitArray[9], hexArray[0],
               hexArray[1], hexArray[2], hexArray[3], hexArray[4], hexArray[5], hexArray[6], hexArray[7], hexArray[8],
               hexArray[9], byteArray[0], byteArray[1], byteArray[2], byteArray[3], byteArray[4], byteArray[5],
               byteArray[6], byteArray[7], byteArray[8], byteArray[9], mscLocation, vlrLocation, i);
 
+          // Put in an arbitrary delay to avoid swamping servers and making graphs look funny...
           if (i % 20 == 0) {
             Thread.sleep(1);
           }
 
         }
 
+        // Important! Until this statement finishes Inserts are still happening..
         client.drain();
+        
         recordCount = getRecordCount(client);
         msg(recordCount + " rows seen after insert");
 
         msg(rows + " rows processed in " + (System.currentTimeMillis() - start) + "ms");
 
         start = System.currentTimeMillis();
-
         msg(theCallback.getDupCount() + " dup seen");
         theCallback.setDupCount(0);
 
-        msg("Waiting 30 seconds...");
-        Thread.sleep(30000);
+        msg("Waiting " + DELAY_SECONDS + "seconds...");
+        Thread.sleep(DELAY_SECONDS);
       }
 
     } catch (Exception e) {
-      e.printStackTrace();
+      logger.error(e.getMessage());
     }
 
   }
@@ -332,7 +341,7 @@ public class TatpClient implements Runnable {
    * Get number of partitions - can influence performance, so we need to record
    * it in file name.
    * 
-   * @return
+   * @return number of partitions
    */
   private int getPartitionCount() {
     int pCount = 8;
@@ -344,14 +353,18 @@ public class TatpClient implements Runnable {
         pCount = statsResponse.getResults()[0].getRowCount();
       }
 
-    } catch (IOException | ProcCallException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+    } catch (Exception e) {
+      logger.error(e.getMessage());
     }
 
     return pCount;
   }
 
+  /**
+   * Normally we'll have 10 instances of this class each running at 
+   * the same time.
+   * @return null or a message saying why we can't continue.
+   */
   public String runBenchmark() {
 
     if (doStats) {
@@ -475,8 +488,7 @@ public class TatpClient implements Runnable {
           }
 
         } catch (Exception e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
+          logger.error(e.getMessage());
         }
       }
 
@@ -487,11 +499,9 @@ public class TatpClient implements Runnable {
       callbackClient.drain();
       statsClient.drain();
     } catch (NoConnectionsException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      logger.error(e.getMessage());
     } catch (InterruptedException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      logger.error(e.getMessage());
     }
     msg("Transactions = " + txnCount);
     msg("runtime = " + timeInSeconds);
@@ -501,7 +511,7 @@ public class TatpClient implements Runnable {
   }
 
   /**
-   * Launc a TATP transaction.
+   * Launch a single TATP transaction.
    */
   private void launchTransaction() {
     txnCount++;
@@ -628,11 +638,9 @@ public class TatpClient implements Runnable {
       }
 
     } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      logger.error(e.getMessage());
     } catch (ProcCallException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      logger.error(e.getMessage());
     }
 
     h.reportLatency(mapTypeToString(txnType) + "_INVOKE_MS", START_TIME, "", 1000);
@@ -756,7 +764,7 @@ public class TatpClient implements Runnable {
       }
 
     } catch (Exception e) {
-      e.printStackTrace();
+      logger.error(e.getMessage());
       throw new Exception("VoltDB connection failed.." + e.getMessage(), e);
     }
 
@@ -1013,8 +1021,7 @@ public class TatpClient implements Runnable {
               txnCount += testRunners[i].getTxnCount();
             }
           } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.error(e.getMessage());
           }
         }
 
@@ -1070,10 +1077,9 @@ public class TatpClient implements Runnable {
         }
 
       } catch (FileNotFoundException e) {
-        e.printStackTrace();
+        logger.error(e.getMessage());
       } catch (InterruptedException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+        logger.error(e.getMessage());
       }
 
     }
@@ -1084,7 +1090,8 @@ public class TatpClient implements Runnable {
 
   private void createSchemaIfNeeded() throws Exception {
 
-    VoltDBSchemaBuilder b = new VoltDBSchemaBuilder(ddlStatements, procStatements, "tatpProcs.jar", client, "voltdbtatp.db");
+    VoltDBSchemaBuilder b = new VoltDBSchemaBuilder(ddlStatements, procStatements, "tatpProcs.jar", client,
+        "voltdbtatp.db");
 
     b.loadClassesAndDDLIfNeeded(testProcName, testParams);
 
@@ -1108,11 +1115,9 @@ public class TatpClient implements Runnable {
       statsClient.close();
 
     } catch (InterruptedException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      logger.error(e.getMessage());
     } catch (NoConnectionsException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      logger.error(e.getMessage());
     }
 
     client = null;
