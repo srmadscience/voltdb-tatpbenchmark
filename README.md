@@ -21,7 +21,7 @@ A [PDF](https://bitbucket.org/voltdbseteam/tatp_2019/src/master/docs/TATP_Descri
 
 The Schema looks like this:
 
-![TATP Schema] (docs/tatp_schema.png)
+[TATP Schema] (docs/tatp_schema.png)
 
 The documentation defines it as the following tables:
 
