@@ -4,12 +4,19 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.voltdb</groupId>
 	<artifactId>voltdb-tatpbenchmark</artifactId>
+	<configuration>
+    <archive>
+      <manifest>
+        <mainClass>org.voltdb.tatp.client.TatoClient</mainClass>
+      </manifest>
+    </archive>
+  </configuration>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>Telecom Application Transaction Processing</name>
 	<properties>
-    <maven.compiler.target>1.8</maven.compiler.target>
-    <maven.compiler.source>1.8</maven.compiler.source>
-</properties>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<maven.compiler.source>1.8</maven.compiler.source>
+	</properties>
 	<dependencies>
 		<!-- https://mvnrepository.com/artifact/org.voltdb/voltdbclient -->
 		<dependency>
