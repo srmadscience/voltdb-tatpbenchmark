@@ -511,7 +511,10 @@ public class TatpClient implements Runnable {
   }
 
   /**
-   * Launch a single TATP transaction.
+   * Launch a single TATP transaction. Note that this is non-trival! Update Location,
+   * Insert Call Forwarding and Delete Call Forwarding all use a 2 stage process where 
+   * the first callback maps the given ID to a subscriber ID and then creates and launches
+   * a second callback that does the actual work. 
    */
   private void launchTransaction() {
     txnCount++;
@@ -520,6 +523,7 @@ public class TatpClient implements Runnable {
     final long START_TIME = System.currentTimeMillis();
     final long START_TIME_NANOS = Long.MIN_VALUE;
 
+    // Get pseudo-random subscriber id
     int sid = getRandomSid();
 
     BaseCallback theCallback = null;
@@ -566,6 +570,14 @@ public class TatpClient implements Runnable {
 
       case UPDATE_LOCATION:
 
+        // Depending on how we are going to handle the FK issue we do different things.
+        //
+        // FKMODE_ALL_PARTITIONS sends a request to each partition to try and map the FK id to a 
+        // subscriber id. The callback listens for responses and reacts to the first (and 
+        // hopefully *only* valid one.
+        //
+        // FKMODE_MULTI_QUERY does a global read to map the FK to an ID and then creates a new callback
+        // to do the work when it has a valid ID.
         if (fkMode == FKMODE_ALL_PARTITIONS) {
           theMPCallback = new UpdateLocationInvokerCallbackNoView(START_TIME, START_TIME_NANOS, sid, h,
               "UPDATE_LOCATION", getRandomLocation(), callbackClient);
