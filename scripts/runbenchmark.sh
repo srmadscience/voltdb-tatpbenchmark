@@ -1,5 +1,8 @@
 #!/bin/sh -x 
 
+BASEDIR=$(dirname "$0")
+cd $BASEDIR/..
+
 if
 	[ ! -r target/voltdb-tatpbenchmark-0.0.1-SNAPSHOT-jar-with-dependencies.jar ]
 then
