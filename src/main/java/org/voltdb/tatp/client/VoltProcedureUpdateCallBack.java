@@ -42,8 +42,6 @@ public class VoltProcedureUpdateCallBack implements ProcedureCallback {
 				dupCount++;
 			} else {
 
-				//System.out.println("VoltDB Asynchronous stored procedure failed. Res: " + response.getStatus() + " "
-				//		+ response.getStatusString());
 			    histCache.incCounter("ERROR");
 
 

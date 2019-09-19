@@ -51,45 +51,31 @@ import org.voltdb.voltutil.stats.StatsHistogram;
 
 public class TatpClient implements Runnable {
 
+  // Different Event types
   public static final int GET_SUBSCRIBER_DATA = 0;
   public static final int GET_NEW_DESTINATION = 1;
   public static final int GET_ACCESS_DATA = 2;
-
   public static final int UPDATE_SUBSCRIBER_DATA = 3;
   public static final int UPDATE_LOCATION = 4;
   public static final int INSERT_CALL_FORWARDING = 5;
   public static final int DELETE_CALL_FORWARDING = 6;
 
+  // How we're handling FK lookups
   public static final int FKMODE_ALL_PARTITIONS = 0;
   public static final int FKMODE_MAT_VIEW = 1;
   public static final int FKMODE_MULTI_QUERY = 2;
 
+  // How long we wait between passes
   private static final long DELAY_SECONDS = 5;
+  
+  // Max acceptable client CPU
   private static final int MAX_CPU_PCT = 80;
-
-  Random r = new Random(42);
-  long endTime = 0;
-  long tps = 0;
-
-  Client client = null;
-  Client callbackClient = null;
-  Client statsClient = null;
-  SafeHistogramCache h = SafeHistogramCache.getInstance();
-
-  long txnCount = 0;
-  long startTime = 0;
-  int size = 0;
-
-  int fkMode = FKMODE_MAT_VIEW;
-
-  long lastStatsTime = System.currentTimeMillis();
-  final int statsIntervalMs = 5000;
-  int timeInSeconds;
-  boolean doStats = false;
-  int clientId;
-
-  JavaSysMon monitor = new JavaSysMon();
-
+  
+  /**
+   * DDL statements for the VoltDB implementation of TATP. Note that you just run this
+   * using SQLCMD, but the make this implementation easier to re-create we do it 
+   * Programmatically.
+   */
   final String[] ddlStatements = {
       "CREATE TABLE subscriber " + "      (s_id BIGINT NOT NULL PRIMARY KEY, sub_nbr VARCHAR(15) NOT NULL , "
           + "      bit_1 TINYINT, bit_2 TINYINT, bit_3 TINYINT, bit_4 TINYINT, bit_5 TINYINT, "
@@ -121,7 +107,12 @@ public class TatpClient implements Runnable {
           + "      FOREIGN KEY (s_id, sf_type) REFERENCES special_facility(s_id, sf_type));",
       "PARTITION TABLE call_forwarding ON COLUMN s_id;" };
 
-  final String[] procStatements = { "CREATE PROCEDURE FROM CLASS voltdbtatp.db.Reset;"
+  /**
+   * Procedure statements for the VoltDB implementation of TATP. Note that you just run this
+   * using SQLCMD, but the make this implementation easier to re-create we do it 
+   * Programmatically.
+   */
+ final String[] procStatements = { "CREATE PROCEDURE FROM CLASS voltdbtatp.db.Reset;"
 
       , "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.DeleteCallForwarding;"
 
@@ -150,8 +141,36 @@ public class TatpClient implements Runnable {
       ,
       "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.MapManySubStringToNumberNoView;" };
 
+  // We only create the DDL and procedures if a call to testProcName with testParams fails....
   final String testProcName = "GetSubscriberData";
   final Object[] testParams = { new Long(42) };
+
+  
+  // We use three clients. You need a separate callback client
+  // to avoid threading issues while interacting with the DB in a
+  // callback.
+  Client client = null;
+  Client callbackClient = null;
+  Client statsClient = null;
+  
+  // Used to monitor client CPU load.
+  JavaSysMon monitor = new JavaSysMon();
+
+  // Stores stats
+  SafeHistogramCache h = SafeHistogramCache.getInstance();
+
+  Random r = new Random(42);
+  long endTime = 0;
+  long tps = 0;
+  long txnCount = 0;
+  long startTime = 0;
+  int size = 0;
+  int fkMode = FKMODE_MAT_VIEW;
+  long lastStatsTime = System.currentTimeMillis();
+  final int statsIntervalMs = 5000;
+  int timeInSeconds;
+  boolean doStats = false;
+  int clientId;
 
   private static Logger logger = LoggerFactory.getLogger(TatpClient.class);
 
@@ -751,6 +770,7 @@ public class TatpClient implements Runnable {
     Date now = new Date();
     String strDate = sdfDate.format(now);
     System.out.println(strDate + ":" + message);
+    logger.info(strDate + ":" + message);
   }
 
   public static String mapTypeToString(int type) {
