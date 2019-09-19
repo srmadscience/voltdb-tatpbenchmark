@@ -91,11 +91,6 @@ public class TatpClient implements Runnable {
       
        , "create ASSUMEUNIQUE index sub_idx on subscriber(sub_nbr);"
        
-//,     "create view sub_nbr_to_sub_map as " + "select s_id, count(*) how_many, min(sub_nbr) sub_nbr "
-//          + "from subscriber  " + "group by s_id;",
-//
-//      "create index map_idx on sub_nbr_to_sub_map(sub_nbr);",
-      
      , "CREATE TABLE access_info " + "      (s_id BIGINT NOT NULL, ai_type TINYINT NOT NULL, "
           + "      data1 SMALLINT, data2 SMALLINT, data3 VARCHAR(3), data4 VARCHAR(5), "
           + "      PRIMARY KEY (s_id, ai_type), " + "      FOREIGN KEY (s_id) REFERENCES subscriber (s_id));",
@@ -1187,10 +1182,10 @@ public class TatpClient implements Runnable {
 
     switch (fkMode) {
     case FKMODE_QUERY_ALL_PARTITIONS_FIRST:
-      description = "ALL_PARTITIONS";
+      description = "ALL_PARTITIONS_FIRST";
       break;
     case FKMODE_TASK_ALL_PARTITIONS:
-      description = "MAT_VIEW";
+      description = "ALL_PARTITIONS_ASKED";
       break;
     case FKMODE_MULTI_QUERY_FIRST:
       description = "MULTI_QUERY";
