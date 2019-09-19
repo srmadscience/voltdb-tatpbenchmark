@@ -1185,10 +1185,10 @@ public class TatpClient implements Runnable {
       description = "ALL_PARTITIONS_FIRST";
       break;
     case FKMODE_TASK_ALL_PARTITIONS:
-      description = "ALL_PARTITIONS_ASKED";
+      description = "ALL_PARTITIONS_TASKED";
       break;
     case FKMODE_MULTI_QUERY_FIRST:
-      description = "MULTI_QUERY";
+      description = "MULTI_QUERY_FIRST";
       break;
     }
 
