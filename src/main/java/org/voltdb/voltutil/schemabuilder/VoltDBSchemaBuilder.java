@@ -172,7 +172,6 @@ public final class VoltDBSchemaBuilder {
         if (cr.getStatus() != ClientResponse.SUCCESS) {
           throw new Exception("Attempt to execute '" + ddlStatements[i] + "' failed:" + cr.getStatusString());
         }
-        System.out.println(ddlStatements[i]);
         logger.info(ddlStatements[i]);
       } catch (Exception e) {
 
@@ -193,7 +192,7 @@ public final class VoltDBSchemaBuilder {
 
     for (int i = 0; i < jarFiles.length; i++) {
       InputStream is = getClass().getResourceAsStream("/" + procPackageName.replace(".", "/") + "/" + jarFiles[i] + ".class");
-      System.out.println(procPackageName.replace(".", "/") + "/" + jarFiles[i]);
+      logger.info("processing " + procPackageName.replace(".", "/") + "/" + jarFiles[i]);
       add(procPackageName.replace(".", "/") + "/" + jarFiles[i]+ ".class", is, newJarFile);
     }
 
