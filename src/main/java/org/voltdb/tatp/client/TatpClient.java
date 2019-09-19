@@ -1106,7 +1106,7 @@ public class TatpClient implements Runnable {
         // msg(tatpRunner.toString());
 
         if (ok == null) {
-          msg("Waiting " + DELAY_SECONDS + " seconds before next pass at " + startTps + "TPS...");
+          msg("Waiting " + DELAY_SECONDS + " seconds before next pass at " + startTps + " TPS...");
           Thread.sleep(DELAY_SECONDS);
         }
 
