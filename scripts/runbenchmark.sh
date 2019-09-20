@@ -28,6 +28,12 @@ then
 	HNAME=$1
 fi
 
+if 
+	[ "$2" != "" ]
+then
+	TNAME=$2
+fi
+
 STARTTPS=2000
 INCTPS=2000
 SUBS=5000000
