@@ -6,6 +6,16 @@ cd $BASEDIR/..
 if
         [ ! -r target/voltdb-tatpbenchmark-0.0.1-SNAPSHOT-jar-with-dependencies.jar ]
 then
+    which mvn
+
+    if 
+	[ "$?" = "1" ]
+    then
+	echo "Maven needed. Try:"
+	echo "sudo apt install maven"
+	exit 1
+    fi 
+
     mvn clean compile assembly:single
 fi
 
