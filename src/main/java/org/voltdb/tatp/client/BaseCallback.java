@@ -46,8 +46,6 @@ public class BaseCallback extends AbstactCallback implements ProcedureCallback {
 		// Make sure the procedure succeeded.
 		if (response.getStatus() != ClientResponse.SUCCESS) {
 
-			//System.out.println("VoltDB Asynchronous stored procedure failed. Res: " + response.getStatus() + " "
-			//		+ response.getStatusString());
 
 			histCache.reportLatency(callbackStatsCategory + "_FAIL_MS", startTime, response.getStatusString(),
 					MILLISECOND_STATS_SIZE);

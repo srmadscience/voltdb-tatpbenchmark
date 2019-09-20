@@ -469,16 +469,18 @@ public class TatpClient implements Runnable {
 
             }
           }
+          
           CpuTimes thisCpu = monitor.cpuTimes();
-          int cpuPct = (int) (thisCpu.getCpuUsage(lastCpu) * 100);
-
-          h.report("CLIENT_CPU", cpuPct, "", 100);
+          int cpuPct = (int) (thisCpu.getCpuUsage(lastCpu) * 100);      
 
           if (cpuPct > MAX_CPU_PCT) {
             msg(clientId + ": COD: Client CPU = " + thisCpu.getCpuUsage(lastCpu));
             ok = "COD: Client CPU  = " + thisCpu.getCpuUsage(lastCpu);
+            h.report("CLIENT_CPU", cpuPct, ok, 100);
             h.incCounter("ERROR");
 
+          } else {
+            h.report("CLIENT_CPU", cpuPct, "", 100);
           }
 
           lastCpu = thisCpu;
@@ -929,18 +931,14 @@ public class TatpClient implements Runnable {
     b.append(theHist.toStringShort());
     b.append(System.lineSeparator());
 
+    theHist = h.get("CLIENT_CPU");
     b.append(System.lineSeparator());
-
-    for (int i = 0; i <= 30; i++) {
-      theHist = h.get("StackableCallbackHerd_" + i);
-
-      if (theHist != null && theHist.hasReports()) {
-        b.append("Stats for ");
-        b.append(theHist.toStringShort());
-        b.append(System.lineSeparator());
-      }
-    }
-
+    b.append("CLIENT_CPU ");
+    b.append(theHist.toStringShort());
+    b.append(System.lineSeparator());
+   
+    
+    
     return b.toString();
   }
 
@@ -1025,7 +1023,7 @@ public class TatpClient implements Runnable {
         final int partCount = testRunners[0].getPartitionCount();
 
         File theFile = new File(testname + "_" + startTps + "_" + size + "_" + mapFkModeToString(fkMode) + "_" + mins
-            + "_" + partCount + "_" + threadCount + ".log");
+            + "_" + partCount + "_" + threadCount + ".dat");
         if (theFile.exists()) {
           theFile.delete();
         }
@@ -1058,8 +1056,8 @@ public class TatpClient implements Runnable {
         PrintWriter out = new PrintWriter(theFile.getAbsolutePath());
         out.println("Expected transactions/Actual transactions  = " + expectedTransactions + "/" + txnCount);
 
-        if (txnCount < (expectedTransactions * 0.9)) {
-          ok = "COD: Unable to do 90% of requested transactions...";
+        if (txnCount < (expectedTransactions * 0.75)) {
+          ok = "COD: Unable to do 75% of requested transactions...";
           h.incCounter("ERROR");
         }
 
