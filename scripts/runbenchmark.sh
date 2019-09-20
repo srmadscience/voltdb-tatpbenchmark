@@ -21,6 +21,12 @@ fi
 
 TNAME=`uname -n`
 HNAME=`uname -n`
+STARTTPS=2000
+INCTPS=2000
+SUBS=5000000
+MINS=5
+THREADS=10
+
 
 if 
 	[ "$1" != "" ]
@@ -34,11 +40,11 @@ then
 	TNAME=$2
 fi
 
-STARTTPS=2000
-INCTPS=2000
-SUBS=5000000
-MINS=5
-THREADS=10
+if 
+	[ "$3" != "" ]
+then
+	SUBS=$3
+fi
 
 if
 	[ ! -d results ]
