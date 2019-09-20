@@ -25,42 +25,43 @@ package org.voltdb.tatp.client;
 
 import java.io.IOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.voltdb.client.Client;
 import org.voltdb.client.ClientResponse;
-import org.voltdb.voltutil.stats.SafeHistogramCache;
 
 public class InsertCallForwardingInvokerCallback extends BaseCallback {
 
-	int randomBit = 0;
-	int randomData = 0;
-	int randomSfType = 0;
+  private static Logger logger = LoggerFactory.getLogger(InsertCallForwardingInvokerCallback.class);
 
-	
-	
-	public InsertCallForwardingInvokerCallback(long startTime, long startTimeNanos,  int sid, 
-			String callbackStatsCategory, Client c, int randomBit, int randomData, int randomSfType) {
+  int randomBit = 0;
+  int randomData = 0;
+  int randomSfType = 0;
 
-		super(startTime, startTimeNanos, sid, callbackStatsCategory, c, false);
-		this.randomBit = randomBit;
-		this.randomData = randomData;
-		this.randomSfType = randomSfType;
+  public InsertCallForwardingInvokerCallback(long startTime, long startTimeNanos, int sid, String callbackStatsCategory,
+      Client c, int randomBit, int randomData, int randomSfType) {
 
-	}
+    super(startTime, startTimeNanos, sid, callbackStatsCategory, c, false);
+    this.randomBit = randomBit;
+    this.randomData = randomData;
+    this.randomSfType = randomSfType;
 
-	@Override
-	public void clientCallback(ClientResponse response) {
+  }
 
-		super.clientCallback(response);
+  @Override
+  public void clientCallback(ClientResponse response) {
 
-		int sid = getSid(response);
-		BaseCallback c2  = new BaseCallback(startTime, startTimeNanos, sid, callbackStatsCategory + "_2", theClient, true);
+    super.clientCallback(response);
 
-		try {
-			theClient.callProcedure(c2, "InsertCallForwarding", sid, randomBit, randomData, randomSfType);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+    int sid = getSid(response);
+    BaseCallback c2 = new BaseCallback(startTime, startTimeNanos, sid, callbackStatsCategory + "_2", theClient, true);
 
-	}
+    try {
+      theClient.callProcedure(c2, "InsertCallForwarding", sid, randomBit, randomData, randomSfType);
+    } catch (IOException e) {
+      logger.error(e.getMessage());
+    }
+
+  }
 
 }

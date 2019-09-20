@@ -2,9 +2,10 @@ package org.voltdb.tatp.client;
 
 import java.io.IOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.voltdb.client.Client;
 import org.voltdb.client.ClientResponseWithPartitionKey;
-import org.voltdb.voltutil.stats.SafeHistogramCache;
 
 /* This file is part of VoltDB.
  * Copyright (C) 2008-2019 VoltDB Inc.
@@ -31,49 +32,50 @@ import org.voltdb.voltutil.stats.SafeHistogramCache;
 
 public class DeleteCallForwardingInvokerCallbackNoView extends BaseMPCallback {
 
-	long randomStartTime = 0;
-	int randomSfType = 0;
+  private static Logger logger = LoggerFactory.getLogger(DeleteCallForwardingInvokerCallbackNoView.class);
 
-	public DeleteCallForwardingInvokerCallbackNoView(long startTime, long startTimeNanos, int sid, 
-			String callbackStatsCategory, Client c, long randomStartTime, int randomSfType) {
+  long randomStartTime = 0;
+  int randomSfType = 0;
 
-		super(startTime, startTimeNanos, sid, callbackStatsCategory, c, false);
-		this.randomStartTime = randomStartTime;
-		this.randomSfType = randomSfType;
+  public DeleteCallForwardingInvokerCallbackNoView(long startTime, long startTimeNanos, int sid,
+      String callbackStatsCategory, Client c, long randomStartTime, int randomSfType) {
 
-	}
+    super(startTime, startTimeNanos, sid, callbackStatsCategory, c, false);
+    this.randomStartTime = randomStartTime;
+    this.randomSfType = randomSfType;
 
-	@Override
-	public void clientCallback(ClientResponseWithPartitionKey[] response) {
+  }
 
-		try {
-			super.clientCallback(response);
-		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+  @Override
+  public void clientCallback(ClientResponseWithPartitionKey[] response) {
 
-		for (int i = 0; i < response.length; i++) {
+    try {
+      super.clientCallback(response);
+    } catch (Exception e1) {
+      logger.error(e1.getMessage());
+    }
 
-			int sid = getSid(response[i].response);
+    for (int i = 0; i < response.length; i++) {
 
-			if (sid > -1) {
-				break;
-			}
-		}
+      int sid = getSid(response[i].response);
 
-		if (sid > -1) {
-			BaseCallback c2 = new BaseCallback(startTime, startTimeNanos, sid, callbackStatsCategory + "_2",
-					theClient, true);
-			try {
-				theClient.callProcedure(c2, "DeleteCallForwarding", sid, randomSfType, randomStartTime);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		} else {
-			System.out.println("Error: Unable to map SID");
-		}
+      if (sid > -1) {
+        break;
+      }
+    }
 
-	}
+    if (sid > -1) {
+      BaseCallback c2 = new BaseCallback(startTime, startTimeNanos, sid, callbackStatsCategory + "_2", theClient, true);
+      try {
+        theClient.callProcedure(c2, "DeleteCallForwarding", sid, randomSfType, randomStartTime);
+      } catch (IOException e) {
+        logger.error(e.getMessage());
+      }
+    } else {
+
+      logger.error("Error: Unable to map SID");
+    }
+
+  }
 
 }

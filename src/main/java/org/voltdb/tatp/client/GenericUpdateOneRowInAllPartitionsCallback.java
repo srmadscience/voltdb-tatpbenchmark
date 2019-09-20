@@ -34,7 +34,7 @@ public class GenericUpdateOneRowInAllPartitionsCallback extends BaseMPCallback {
 
   public GenericUpdateOneRowInAllPartitionsCallback(long startTime, long startTimeNanos, int sid,
       String callbackStatsCategory, Client c) {
-    super(startTime, startTimeNanos, sid, callbackStatsCategory, c, false);
+    super(startTime, startTimeNanos, sid, callbackStatsCategory, c, true);
 
   }
 
@@ -52,18 +52,14 @@ public class GenericUpdateOneRowInAllPartitionsCallback extends BaseMPCallback {
 
     for (int i = 0; i < response.length; i++) {
       updated += getUpdateCount(response[i].response);
-      
-      if (updated < 0 || updated > 2) {
-        System.out.println("foo");
-      }
     }
 
     if (updated == 1) {
       histCache.incCounter(callbackStatsCategory + "_WORKED");
     } else {
       histCache.incCounter(callbackStatsCategory + "_FAILED");
-      logger.error("Error: " + callbackStatsCategory + ": Didn't update 1 and only 1 record for sid " 
-          + sid +". got " + updated + " instead'");
+      logger.error("Error: " + callbackStatsCategory + ": Didn't update 1 and only 1 record for sid " + sid + ". got "
+          + updated + " instead'");
     }
   }
 
@@ -75,9 +71,9 @@ public class GenericUpdateOneRowInAllPartitionsCallback extends BaseMPCallback {
 
       VoltTable[] resultTables = response.getResults();
 
-      //Assume we're looking for the last SQL statement result....
-      if (resultTables[resultTables.length-1].advanceRow()) {
-        count =  resultTables[resultTables.length-1].getLong(0);
+      // Assume we're looking for the last SQL statement result....
+      if (resultTables[resultTables.length - 1].advanceRow()) {
+        count = resultTables[resultTables.length - 1].getLong(0);
       }
 
     } else {

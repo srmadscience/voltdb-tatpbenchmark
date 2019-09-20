@@ -394,8 +394,7 @@ public class TatpClient implements Runnable {
           try {
             Thread.sleep(0, 500000);
           } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.error(e.getMessage());
           }
         }
       }
@@ -595,7 +594,7 @@ public class TatpClient implements Runnable {
 
         } else if (fkMode == FKMODE_TASK_ALL_PARTITIONS) {
 
-          theMPCallback = new GenericUpdateOneRowInAllPartitionsCallback(START_TIME, START_TIME_NANOS, sid,  "UPDATE_LOCATION_MP",
+          theMPCallback = new GenericUpdateOneRowInAllPartitionsCallback(START_TIME, START_TIME_NANOS, sid,  "UPDATE_LOCATION",
               callbackClient);
 
           client.callAllPartitionProcedure(theMPCallback, "UpdateLocationMultiPartition", fkString, getRandomLocation());
@@ -624,7 +623,7 @@ public class TatpClient implements Runnable {
         } else if (fkMode == FKMODE_TASK_ALL_PARTITIONS) {
           
           
-          theMPCallback = new GenericUpdateOneRowInAllPartitionsCallback(START_TIME, START_TIME_NANOS, sid,  "INSERT_CALL_FORWARDING_MP",
+          theMPCallback = new GenericUpdateOneRowInAllPartitionsCallback(START_TIME, START_TIME_NANOS, sid,  "INSERT_CALL_FORWARDING",
               callbackClient);
 
           client.callAllPartitionProcedure(theMPCallback, "InsertCallForwardingMultiPartition"
@@ -650,7 +649,7 @@ public class TatpClient implements Runnable {
 
         } else if (fkMode == FKMODE_TASK_ALL_PARTITIONS) {
           
-          theMPCallback = new GenericUpdateOneRowInAllPartitionsCallback(START_TIME, START_TIME_NANOS, sid,  "DELETE_CALL_FORWARDING_MP",
+          theMPCallback = new GenericUpdateOneRowInAllPartitionsCallback(START_TIME, START_TIME_NANOS, sid,  "DELETE_CALL_FORWARDING",
               callbackClient);
 
           client.callAllPartitionProcedure(theMPCallback, "DeleteCallForwardingMultiPartition"
@@ -883,8 +882,6 @@ public class TatpClient implements Runnable {
           StatsHistogram theHist = h.get(mapTypeToString(i) + CALLBACKS[c] + SUFFIXES[s]);
 
           if (theHist != null && theHist.hasReports()) {
-            // b.append("Stats for " + mapTypeToString(i) +
-            // CALLBACKS[c] + SUFFIXES[s]);
             b.append(theHist.toStringShort());
             b.append(System.lineSeparator());
           }

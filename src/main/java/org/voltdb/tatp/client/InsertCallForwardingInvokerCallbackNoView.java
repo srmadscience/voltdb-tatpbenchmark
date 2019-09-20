@@ -25,11 +25,14 @@ package org.voltdb.tatp.client;
 
 import java.io.IOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.voltdb.client.Client;
 import org.voltdb.client.ClientResponseWithPartitionKey;
-import org.voltdb.voltutil.stats.SafeHistogramCache;
 
 public class InsertCallForwardingInvokerCallbackNoView extends BaseMPCallback {
+
+  private static Logger logger = LoggerFactory.getLogger(InsertCallForwardingInvokerCallbackNoView.class);
 
 	int randomBit = 0;
 	int randomData = 0;
@@ -51,8 +54,7 @@ public class InsertCallForwardingInvokerCallbackNoView extends BaseMPCallback {
 		try {
 			super.clientCallback(response);
 		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+		  logger.error(e1.getMessage());
 		}
 
 		for (int i = 0; i < response.length; i++) {
@@ -71,11 +73,11 @@ public class InsertCallForwardingInvokerCallbackNoView extends BaseMPCallback {
 			try {
 				theClient.callProcedure(c2, "InsertCallForwarding", sid, randomBit, randomData, randomSfType);
 			} catch (IOException e) {
-				e.printStackTrace();
+			  logger.error(e.getMessage());
 			}
 
 		} else {
-			System.out.println("Error: Unable to map SID");
+		  logger.error("Error: Unable to map SID");
 		}
 	}
 

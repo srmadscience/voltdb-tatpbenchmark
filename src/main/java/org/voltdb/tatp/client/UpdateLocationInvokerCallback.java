@@ -25,38 +25,38 @@ package org.voltdb.tatp.client;
 
 import java.io.IOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.voltdb.client.Client;
 import org.voltdb.client.ClientResponse;
-import org.voltdb.voltutil.stats.SafeHistogramCache;
 
 public class UpdateLocationInvokerCallback extends BaseCallback {
 
-	long newLocation = 0;
+  private static Logger logger = LoggerFactory.getLogger(UpdateLocationInvokerCallback.class);
+  long newLocation = 0;
 
-	public UpdateLocationInvokerCallback(long startTime, long startTimeNanos, int sid,  String callbackStatsCategory,
-			long newLocation, Client c) {
-		super(startTime,startTimeNanos,  sid,  callbackStatsCategory, c,false);
-		this.newLocation = newLocation;
-		
+  public UpdateLocationInvokerCallback(long startTime, long startTimeNanos, int sid, String callbackStatsCategory,
+      long newLocation, Client c) {
+    super(startTime, startTimeNanos, sid, callbackStatsCategory, c, false);
+    this.newLocation = newLocation;
 
-	}
+  }
 
-	@Override
-	public void clientCallback(ClientResponse response) {
+  @Override
+  public void clientCallback(ClientResponse response) {
 
-		super.clientCallback(response);
+    super.clientCallback(response);
 
-		int sid = getSid(response);
-		
-		BaseCallback c2 = new BaseCallback(startTime,startTimeNanos,  sid, callbackStatsCategory + "_2",theClient,true);
+    int sid = getSid(response);
 
-		try {
-			theClient.callProcedure(c2, "UpdateLocation", sid, newLocation);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+    BaseCallback c2 = new BaseCallback(startTime, startTimeNanos, sid, callbackStatsCategory + "_2", theClient, true);
 
-	}
+    try {
+      theClient.callProcedure(c2, "UpdateLocation", sid, newLocation);
+    } catch (IOException e) {
+      logger.error(e.getMessage());
+    }
 
+  }
 
 }

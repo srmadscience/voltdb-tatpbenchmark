@@ -2,9 +2,10 @@ package org.voltdb.tatp.client;
 
 import java.io.IOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.voltdb.client.Client;
 import org.voltdb.client.ClientResponseWithPartitionKey;
-import org.voltdb.voltutil.stats.SafeHistogramCache;
 
 public class UpdateLocationInvokerCallbackNoView extends BaseMPCallback {
 
@@ -31,7 +32,9 @@ public class UpdateLocationInvokerCallbackNoView extends BaseMPCallback {
 	 * OTHER DEALINGS IN THE SOFTWARE.
 	 */
 	
-	long newLocation = 0;
+  private static Logger logger = LoggerFactory.getLogger(UpdateLocationInvokerCallbackNoView.class);
+
+  long newLocation = 0;
 
 	public UpdateLocationInvokerCallbackNoView(long startTime, long startTimeNanos, int sid, 
 			String callbackStatsCategory, long newLocation, Client c) {
@@ -48,8 +51,7 @@ public class UpdateLocationInvokerCallbackNoView extends BaseMPCallback {
 		try {
 			super.clientCallback(response);
 		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+		  logger.error(e1.getMessage());
 		}
 
 		for (int i = 0; i < response.length; i++) {
@@ -69,11 +71,11 @@ public class UpdateLocationInvokerCallbackNoView extends BaseMPCallback {
 			try {
 				theClient.callProcedure(c2, "UpdateLocation", sid, newLocation);
 			} catch (IOException e) {
-				e.printStackTrace();
+			  logger.error(e.getMessage());
 			}
 			
 		} else {
-			System.out.println("Error: Unable to map SID");
+		  logger.error("Error: Unable to map SID");
 		}
 	}
 
