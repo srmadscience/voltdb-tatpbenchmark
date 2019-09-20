@@ -1022,7 +1022,7 @@ public class TatpClient implements Runnable {
         testRunners[0].setDoStats(true);
         final int partCount = testRunners[0].getPartitionCount();
 
-        File theFile = new File(testname + "_" + startTps + "_" + size + "_" + mapFkModeToString(fkMode) + "_" + mins
+        File theFile = new File("results" + File.separator + testname + "_" + startTps + "_" + size + "_" + mapFkModeToString(fkMode) + "_" + mins
             + "_" + partCount + "_" + threadCount + ".dat");
         if (theFile.exists()) {
           theFile.delete();

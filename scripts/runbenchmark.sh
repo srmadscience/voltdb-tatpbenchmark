@@ -21,7 +21,7 @@ for i in  0 1 2
 do
         java -Dlog4j.configurationFile=src/main/java/org/voltdb/tatp/client/log4j2-test.xml -jar target/voltdb-tatpbenchmark-0.0.1-SNAPSHOT-jar-with-dependencies.jar  \
                 ${TNAME} ${HNAME} ${STARTTPS} ${INCTPS} ${SUBS} ${i} ${MINS} ${THREADS} |  \
-                tee -a  ${TNAME}_${HNAME}_${STARTTPS}_${INCTPS}_${SUBS}_${i}_${MINS}_${THREADS}.log
+                tee -a  results/${TNAME}_${HNAME}_${STARTTPS}_${INCTPS}_${SUBS}_${i}_${MINS}_${THREADS}.log
 
 done
 
