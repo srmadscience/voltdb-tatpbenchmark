@@ -1,0 +1,92 @@
+Expected transactions/Actual transactions  = 19800000/17549966
+RUNNER 0:
+Requested TPS=6600 Actual TPS=5863 Size=20000000 Duration (seconds)=299
+GET_SUBSCRIBER_DATA_WALL_MILLIS 
+ Reports=        11057519 Average=               0, Total=       2,914,277, 50%=               0, 95%=               0, 99%=               0, 99.5%=               0, 99.95%=               0, Max=              85
+GET_SUBSCRIBER_DATA_VOLT_CLIENT_MS 
+ Reports=        11057519 Average=               0, Total=         757,424, 50%=               0, 95%=               0, 99%=               0, 99.5%=               0, 99.95%=               0, Max=              85
+GET_SUBSCRIBER_DATA_VOLT_CLUSTER_MS 
+ Reports=        11057519 Average=               0, Total=         568,520, 50%=               0, 95%=               0, 99%=               0, 99.5%=               0, 99.95%=               0, Max=              85
+
+GET_NEW_DESTINATION_WALL_MILLIS 
+ Reports=         1755893 Average=               0, Total=         467,612, 50%=               0, 95%=               0, 99%=               0, 99.5%=               0, 99.95%=               0, Max=              85
+GET_NEW_DESTINATION_VOLT_CLIENT_MS 
+ Reports=         1755893 Average=               0, Total=         120,124, 50%=               0, 95%=               0, 99%=               0, 99.5%=               0, 99.95%=               0, Max=              85
+GET_NEW_DESTINATION_VOLT_CLUSTER_MS 
+ Reports=         1755893 Average=               0, Total=          90,024, 50%=               0, 95%=               0, 99%=               0, 99.5%=               0, 99.95%=               0, Max=              85
+
+GET_ACCESS_DATA_WALL_MILLIS 
+ Reports=         1053306 Average=               0, Total=         278,114, 50%=               0, 95%=               0, 99%=               0, 99.5%=               0, 99.95%=               0, Max=              85
+GET_ACCESS_DATA_VOLT_CLIENT_MS 
+ Reports=         1053306 Average=               0, Total=          72,567, 50%=               0, 95%=               0, 99%=               0, 99.5%=               0, 99.95%=               0, Max=              85
+GET_ACCESS_DATA_VOLT_CLUSTER_MS 
+ Reports=         1053306 Average=               0, Total=          54,347, 50%=               0, 95%=               0, 99%=               0, 99.5%=               0, 99.95%=               0, Max=              85
+
+UPDATE_SUBSCRIBER_DATA_WALL_MILLIS 
+ Reports=          350547 Average=               0, Total=         147,966, 50%=               0, 95%=               0, 99%=               0, 99.5%=               0, 99.95%=               0, Max=              85
+UPDATE_SUBSCRIBER_DATA_VOLT_CLIENT_MS 
+ Reports=          350547 Average=               0, Total=          33,684, 50%=               0, 95%=               0, 99%=               0, 99.5%=               0, 99.95%=               0, Max=              85
+UPDATE_SUBSCRIBER_DATA_VOLT_CLUSTER_MS 
+ Reports=          350547 Average=               0, Total=          26,067, 50%=               0, 95%=               0, 99%=               0, 99.5%=               0, 99.95%=               0, Max=              85
+
+UPDATE_LOCATION_2_WALL_MILLIS 
+ Reports=         2629988 Average=               1, Total=       3,300,201, 50%=               1, 95%=               6, 99%=               7, 99.5%=               7, 99.95%=               7, Max=              90
+UPDATE_LOCATION_VOLT_CLIENT_MS 
+ Reports=        31559856 Average=               0, Total=       2,116,974, 50%=               0, 95%=               0, 99%=               0, 99.5%=               0, 99.95%=               0, Max=              86
+UPDATE_LOCATION_2_VOLT_CLIENT_MS 
+ Reports=         2629988 Average=               0, Total=         205,786, 50%=               0, 95%=               0, 99%=               0, 99.5%=               0, 99.95%=               0, Max=              85
+UPDATE_LOCATION_VOLT_CLUSTER_MS 
+ Reports=        31559856 Average=               0, Total=       1,654,563, 50%=               0, 95%=               0, 99%=               0, 99.5%=               0, 99.95%=               0, Max=              85
+UPDATE_LOCATION_2_VOLT_CLUSTER_MS 
+ Reports=         2629988 Average=               0, Total=         152,421, 50%=               0, 95%=               0, 99%=               0, 99.5%=               0, 99.95%=               0, Max=              85
+
+INSERT_CALL_FORWARDING_2_WALL_MILLIS 
+ Reports=          351117 Average=               1, Total=         449,406, 50%=               1, 95%=               6, 99%=               7, 99.5%=               7, 99.95%=               7, Max=              86
+INSERT_CALL_FORWARDING_VOLT_CLIENT_MS 
+ Reports=         4213404 Average=               0, Total=         281,704, 50%=               0, 95%=               0, 99%=               0, 99.5%=               0, 99.95%=               0, Max=              85
+INSERT_CALL_FORWARDING_2_VOLT_CLIENT_MS 
+ Reports=          351117 Average=               0, Total=          28,113, 50%=               0, 95%=               0, 99%=               0, 99.5%=               0, 99.95%=               0, Max=              23
+INSERT_CALL_FORWARDING_VOLT_CLUSTER_MS 
+ Reports=         4213404 Average=               0, Total=         219,011, 50%=               0, 95%=               0, 99%=               0, 99.5%=               0, 99.95%=               0, Max=              84
+INSERT_CALL_FORWARDING_2_VOLT_CLUSTER_MS 
+ Reports=          351117 Average=               0, Total=          20,804, 50%=               0, 95%=               0, 99%=               0, 99.5%=               0, 99.95%=               0, Max=              21
+
+DELETE_CALL_FORWARDING_2_WALL_MILLIS 
+ Reports=          351596 Average=               1, Total=         441,841, 50%=               1, 95%=               6, 99%=               7, 99.5%=               7, 99.95%=               7, Max=              87
+DELETE_CALL_FORWARDING_VOLT_CLIENT_MS 
+ Reports=         4219152 Average=               0, Total=         282,722, 50%=               0, 95%=               0, 99%=               0, 99.5%=               0, 99.95%=               0, Max=              85
+DELETE_CALL_FORWARDING_2_VOLT_CLIENT_MS 
+ Reports=          351596 Average=               0, Total=          27,429, 50%=               0, 95%=               0, 99%=               0, 99.5%=               0, 99.95%=               0, Max=              26
+DELETE_CALL_FORWARDING_VOLT_CLUSTER_MS 
+ Reports=         4219152 Average=               0, Total=         220,436, 50%=               0, 95%=               0, 99%=               0, 99.5%=               0, 99.95%=               0, Max=              85
+DELETE_CALL_FORWARDING_2_VOLT_CLUSTER_MS 
+ Reports=          351596 Average=               0, Total=          20,261, 50%=               0, 95%=               0, 99%=               0, 99.5%=               0, 99.95%=               0, Max=              26
+
+
+TPS TPS 
+ Reports=              59 Average=         195,085, Total=      11,510,004, 50%=          193746, 95%=          194924, 99%=          374339, 99.5%=          374339, 99.95%=          374339, Max=          374339
+
+CLIENT_CPU CLIENT_CPU 
+ Reports=              59 Average=              47, Total=           2,767, 50%=              47, 95%=              48, 99%=              48, 99.5%=              48, 99.95%=              48, Max=              48
+
+org.voltdb.client.ClientImpl@6a84a97d
+Extra runner 0
+Requested TPS=6600 Actual TPS=5863
+Extra runner 1
+Requested TPS=6600 Actual TPS=5873
+Extra runner 2
+Requested TPS=6600 Actual TPS=5859
+Extra runner 3
+Requested TPS=6600 Actual TPS=5865
+Extra runner 4
+Requested TPS=6600 Actual TPS=5875
+Extra runner 5
+Requested TPS=6600 Actual TPS=5874
+Extra runner 6
+Requested TPS=6600 Actual TPS=5873
+Extra runner 7
+Requested TPS=6600 Actual TPS=5867
+Extra runner 8
+Requested TPS=6600 Actual TPS=5869
+Extra runner 9
+Requested TPS=6600 Actual TPS=5871
