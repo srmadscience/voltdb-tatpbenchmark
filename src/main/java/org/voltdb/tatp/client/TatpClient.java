@@ -312,7 +312,7 @@ public class TatpClient implements Runnable {
               byteArray[6], byteArray[7], byteArray[8], byteArray[9], mscLocation, vlrLocation, i);
 
           // Put in an arbitrary delay to avoid swamping servers and making graphs look funny...
-          if (i % 20 == 0) {
+          if (i % 100 == 0) {
             Thread.sleep(1);
           }
 
@@ -327,8 +327,6 @@ public class TatpClient implements Runnable {
         msg(rows + " rows processed in " + (System.currentTimeMillis() - start) + "ms");
 
         start = System.currentTimeMillis();
-        msg(theCallback.getDupCount() + " dup seen");
-        theCallback.setDupCount(0);
 
         msg("Waiting " + DELAY_SECONDS + "seconds...");
         Thread.sleep(DELAY_SECONDS);
