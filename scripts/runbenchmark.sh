@@ -21,6 +21,13 @@ fi
 
 TNAME=`uname -n`
 HNAME=`uname -n`
+
+if 
+	[ "$1" != "" ]
+then
+	HNAME=$1
+fi
+
 STARTTPS=2000
 INCTPS=2000
 SUBS=5000000
