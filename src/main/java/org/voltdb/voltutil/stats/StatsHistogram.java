@@ -217,6 +217,10 @@ public class StatsHistogram {
 	
 	public String toStringShort() {
 		StringBuffer b = new StringBuffer(name);
+		
+		for (int i=name.length(); i < 40; i++) {
+		  b.append(" ");
+		}
 
 		b.append(" ");
 		b.append(description);
