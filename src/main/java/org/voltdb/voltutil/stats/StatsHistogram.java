@@ -220,7 +220,6 @@ public class StatsHistogram {
 
 		b.append(" ");
 		b.append(description);
-		b.append(System.lineSeparator());
 		
         b.append(" Reports=");
         b.append(String.format(NUMFORMAT_INTEGER, reports));
