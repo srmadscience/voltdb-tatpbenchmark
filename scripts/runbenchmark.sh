@@ -53,7 +53,7 @@ then
 fi
 
 # We test three ways of solving the 'foreign key' problem
-for i in  0 1 2
+for i in  2 0 1 
 do
         java -Dlog4j.configurationFile=src/main/java/org/voltdb/tatp/client/log4j2-test.xml -jar target/voltdb-tatpbenchmark-0.0.1-SNAPSHOT-jar-with-dependencies.jar  \
                 ${TNAME} ${HNAME} ${STARTTPS} ${INCTPS} ${SUBS} ${i} ${MINS} ${THREADS} |  \
