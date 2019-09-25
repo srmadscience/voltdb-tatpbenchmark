@@ -1,0 +1,11 @@
+
+
+Client->Database Coordinator Node:Send request to do a global,\nread-consistent lookup of your\nAlternative Unique Key
+Database Coordinator Node->(1)Database Node 1:Tell to check for key at a specific\n time in near future
+Database Coordinator Node->(1)Database Node 2:Tell to check for key at a specific time\n in near future
+Database Node 1->(1)Database Coordinator Node: No Primary Key that matches\n Alternative Unique Key found
+Database Node 2->(1)Database Coordinator Node: Matching Primary Key returned
+Database Coordinator Node->Client: Matching Primary Key Value returned
+Client->Database Node 1:Send Newly Obtained Primary key
+Database Node 1->Client: Return Record that matches this Primary Key.
+Client->Database Node 1: Send newly updated record

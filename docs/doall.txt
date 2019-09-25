@@ -1,0 +1,6 @@
+Client->(1)Database Node 1:Tell to try and return the record by looking for the\n Alternative Unique Key\n without co-ordinating with other nodes.
+Client->(1)Database Node 2:Tell to try and return the record by looking for the\n Alternative Unique Key\n without co-ordinating with other nodes.
+note over Client,Database Node 2:We've asynchronously asked all the nodes to try and do\n an update using our Alternative Unique Key and are now\n waiting for an answer...
+Database Node 1->(1)Client: No Primary Key that matches\n Alternative Unique Key found
+Database Node 2->(1)Client: Record matching Alternative Unique Key\n found  and updated in place.
+note over Client,Database Node 2:This technique only works if you are 100% sure your\n"Foreign Key" is an Alternative Unique Key...
