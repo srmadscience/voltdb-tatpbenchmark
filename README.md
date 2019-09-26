@@ -247,13 +247,17 @@ Bear in mind this is on a generic AWS configuration without making any heroic at
 
 1. All the code is in github ([https://github.com/srmadscience/voltdb-tatpbenchmark](https://github.com/srmadscience/voltdb-tatpbenchmark))  and is a maven project. So getting it is a case of:
 
+```
 git clone [https://github.com/srmadscience/voltdb-tatpbenchmark](https://github.com/srmadscience/voltdb-tatpbenchmark)
 
 cd [voltdb-tatpbenchmark](https://github.com/srmadscience/voltdb-tatpbenchmark)
+```
 
 1. The script runbenchmark does a build, and then installs the schema and starts the benchmark:
 
+```
 sh scripts/runbenchmark.sh
+```
 
 &#39;Runbenchmark.sh&#39; can be run with three parameters:
 
@@ -263,7 +267,8 @@ sh scripts/runbenchmark.sh
 
 So an example would be:
 
+```
 sh scripts/runbenchmark.sh vdb1,vdb2,vdb3 mytest 20000000
 
-
+```
 
