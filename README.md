@@ -47,19 +47,21 @@ This will work and scale well, but has two serious problems:
 
 - The real problem is the complexity around error handling. What happens if one write works, but another fails? How do I &quot;uncorrupt&quot; the data? What do I do with incoming requests in the meantime? For these reasons we don&#39;t bother testing this in our implementation, although we might add this in a future iteration.
 
-1. Get your NewSQL/NoSQL store to do a global search, then do a write.
+3. Get your NewSQL/NoSQL store to do a global search, then do a write.
 
-
+![Multi Query](https://github.com/srmadscience/voltdb-tatpbenchmark/blob/master/docs/multiquery.png "Multi Query")
 
 This assumes that there is such a thing as a global read in your environment. In VoltDB we handle this behind the scenes, but a single node will still be in charge of getting the other nodes to issue the query at the exact same moment in time. The &quot; **FKMODE\_MULTI\_QUERY\_FIRST**&quot; option in our implementation does such a read to turn the foreign key into a subscriber id, which is then used for the actual transaction. Under normal circumstances both events take well under a millisecond to complete, which means the time window when things can go wrong is very small.  The downside from a VoltDB perspective is that while what we call &quot;Multi Partition Reads&quot; are fast, they aren&#39;t nearly as fast as single partition transactions.
 
-1. Do a &#39;read&#39; to ask all possible locations if they recognize your unique key, one at a time.
+4. Do a &#39;read&#39; to ask all possible locations if they recognize your unique key, one at a time.
 
+![Ask All](https://github.com/srmadscience/voltdb-tatpbenchmark/blob/master/docs/askall.png "Ask All")
 
 You can do your transaction once you know the subscriber\_id, so as a prerequisite you get the subscriber id by asking everyone if they recognize your Unique Key. This seems slightly crazy, but is actually viable, provided you&#39;re not trying to do this for every transaction. Obviously it creates problems for scalability, but before panicking we should see what kind of numbers we get and see if this is actually an issue. In the TATP benchmark 20% of transactions fall into this category. In our implementation this is the &quot; **FKMODE\_QUERY\_ALL\_PARTITIONS\_FIRST&quot;** _option_ **.**
 
-1. Ask all possible locations to do the update if they have an entry that matches the Unique Key.
+5. Ask all possible locations to do the update if they have an entry that matches the Unique Key.
 
+![Do All](https://github.com/srmadscience/voltdb-tatpbenchmark/blob/master/docs/doall.png "Do All")
 
 
 This is a variation on step &#39;4&#39;, except we just send &#39;writes&#39; to attempt to do the update in every possible location.  In our implementation this is the &quot; **FKMODE\_TASK\_ALL\_PARTITIONS**&quot; option. On the face of it this seems to be a classic case of &#39;write amplification&#39;, but from a Volt perspective &#39;reads&#39; and &#39;writes&#39; both cost roughly the same to do. It also has the advantage that being one step we can&#39;t be flummoxed by the unique key being updated, provided it isn&#39;t instantly assigned to someone else. We know from the Use Case this won&#39;t happen.
@@ -70,6 +72,7 @@ We go into detail about how our implementation works below, but a key takeaway i
 
 The Schema looks like this:
 
+![Schema](https://github.com/srmadscience/voltdb-tatpbenchmark/blob/master/docs/tatp_schema.png "Schema")
 
 The documentation defines it as the following tables:
 
