@@ -78,19 +78,19 @@ The documentation defines it as the following tables:
 
 **Subscriber Table**
 
-1.        s\_id is a unique number between 1 and N where N is the number of subscribers (the population size).Typically, the population sizes start at N=100,000 subscribers, and then N is multiplied by factors of 2, 5 and 10 and so forth, for each order of magnitude. During the population, s\_id is selected randomly from the set of allowed values.
+1. s_id is a unique number between 1 and N where N is the number of subscribers (the population size).Typically, the population sizes start at N=100,000 subscribers, and then N is multiplied by factors of 2, 5 and 10 and so forth, for each order of magnitude. During the population, s\_id is selected randomly from the set of allowed values.
 
-2.        sub\_nbr is a 15 digit string. It is generated from s\_id by transforming s\_id to string and padding it with leading zeros. For example: s\_id 123 sub\_nbr &quot;000000000000123&quot;
+2. sub_nbr is a 15 digit string. It is generated from s\_id by transforming s\_id to string and padding it with leading zeros. For example: s\_id 123 sub\_nbr &quot;000000000000123&quot;
 
-3.        bit\_X fields are randomly generated values (either 0 or 1).
+3. bit_X fields are randomly generated values (either 0 or 1).
 
-4.        hex\_X fields are randomly generated numbers between 0 and 15.
+4. hex_X fields are randomly generated numbers between 0 and 15.
 
-5.        byte2\_X fields are randomly generated numbers between 0 and 255.
+5. byte2_X fields are randomly generated numbers between 0 and 255.
 
-6.        sc\_location and vlr\_location are randomly generated numbers between 1 and (232 – 1).
+6. sc_location and vlr_location are randomly generated numbers between 1 and (232 – 1).
 
-**Access\_Info Table**
+**Access_Info Table**
 
 1.        s\_id references s\_id in the Subscriber table.
 
