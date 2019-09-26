@@ -92,55 +92,55 @@ The documentation defines it as the following tables:
 
 **Access_Info Table**
 
-1.        s\_id references s\_id in the Subscriber table.
+1. s_id references s_id in the Subscriber table.
 
-2.        ai\_type is a number between 1 and 4. It is randomly chosen, but there can only be one record of each ai\_type per each subscriber. In other words, if there are four Access\_Info records for a certain subscriber they have values 1, 2, 3 and 4.
+2. ai_type is a number between 1 and 4. It is randomly chosen, but there can only be one record of each ai_type per each subscriber. In other words, if there are four Access_Info records for a certain subscriber they have values 1, 2, 3 and 4.
 
-3.        data1 and data2 are randomly generated numbers between 0 and 255.
+3. data1 and data2 are randomly generated numbers between 0 and 255.
 
-4.        data3 is a 3-character string that is filled with random characters created with upper case A-Z letters.
+4. data3 is a 3-character string that is filled with random characters created with upper case A-Z letters.
 
-5.        data4 is a 5-character string that is filled with random characters created with upper case A-Z letters.
+5. data4 is a 5-character string that is filled with random characters created with upper case A-Z letters.
 
-There are between 1 and 4 Access\_Info records per Subscriber record, so that there are 25 % subscribers with one record, 25% with two records and so on.
+There are between 1 and 4 Access_Info records per Subscriber record, so that there are 25 % subscribers with one record, 25% with two records and so on.
 
-**Special\_Facility Table**
+**Special_Facility Table**
 
-1.        s\_id references s\_id in the Subscriber table.
+1. s_id references _id in the Subscriber table.
 
-2.        sf\_type is a number between 1 and 4. It is randomly chosen, but there can only be one record of each sf\_type per each subscriber. So if there are four Special\_Facility records for a certain subscriber, they have values 1, 2, 3 and 4.
+2. sf_type is a number between 1 and 4. It is randomly chosen, but there can only be one record of each sf_type per each subscriber. So if there are four Special_Facility records for a certain subscriber, they have values 1, 2, 3 and 4.
 
-3.        is\_active is either 0 or 1. is\_active is chosen to be 1 in 85% of the cases and 0 in 15% of the cases.
+3. is_active is either 0 or 1. is_active is chosen to be 1 in 85% of the cases and 0 in 15% of the cases.
 
-4.        error\_cntrl and data\_a are randomly generated numbers between 0 and 255.
+4. error_cntrl and data_a are randomly generated numbers between 0 and 255.
 
-5.        data\_b is a 5-character string that is filled with random characters created with upper case A-Z letters.
+5. data_b is a 5-character string that is filled with random characters created with upper case A-Z letters.
 
-There are between 1 and 4 Special\_Facility records per row in the Subscriber table, so that there are 25% subscribers with one record, 25% with two records and so on.
+There are between 1 and 4 Special_Facility records per row in the Subscriber table, so that there are 25% subscribers with one record, 25% with two records and so on.
 
-**Call\_Forwarding Table**
+**Call_Forwarding Table**
 
-1.        s\_id and sf\_type reference the corresponding fields in the Special\_Facility table.
+1. s_id and sf_type reference the corresponding fields in the Special_Facility table.
 
-2.        start\_time is of type integer. It can have value 0, 8 or 16 representing midnight, 8 o&#39;clock or 16 o&#39;clock.
+2. start_time is of type integer. It can have value 0, 8 or 16 representing midnight, 8 o&#39;clock or 16 o&#39;clock.
 
-3.        end\_time is of type integer. Its value is start\_time + N, where N is a randomly generated value between 1 and 8.
+3. end_time is of type integer. Its value is start_time + N, where N is a randomly generated value between 1 and 8.
 
-4.        numberx is a randomly generated 15 digit string.
+4. numberx is a randomly generated 15 digit string.
 
-There are between zero and 3 Call\_Forwarding records per Special\_Facility row, so that there are 25 % Special\_Facility records without a Call\_Forwarding record, 25% with one record and so on. Because start\_time is part of the primary key, every record must have different start\_time.
+There are between zero and 3 Call_Forwarding records per Special_Facility row, so that there are 25 % Special_Facility records without a Call_Forwarding record, 25% with one record and so on. Because start_time is part of the primary key, every record must have different start_time.
 
 **Initial Data**
 
 The database is always freshly populated before each benchmark run. This ensures that runs are reproducible, and that each run starts with correct data distributions. The Subscriber table acts as the main table of the benchmark. After generating a subscriber row, its child records in the other tables are generated and inserted. The number of rows in the Subscriber table is used to scale the population size of the other tables. For example, a TATP with population size of 1,000,000 gives the following table cardinalities for the benchmark:
 
-•          Subscriber = 1,000,000 rows
+* Subscriber = 1,000,000 rows
 
-•          Access\_Info ≈ 2,500,000 rows
+* Access_Info ≈ 2,500,000 rows
 
-•          Special\_Facility ≈ 2,500,000 rows
+* Special_Facility ≈ 2,500,000 rows
 
-•          Call\_Forwarding ≈ 3,750,000 rows
+* Call_Forwarding ≈ 3,750,000 rows
 
 **Transaction mixes**
 
@@ -148,51 +148,51 @@ The basic TATP benchmark runs a mixture of seven (7) transactions issued by ten 
 
 **Read Transactions (80%)**
 
-•          GET\_SUBSCRIBER\_DATA 35 %
+* GET_SUBSCRIBER_DATA 35 %
 
-•          GET\_NEW\_DESTINATION 10 %
+* GET_NEW_DESTINATION 10 %
 
-•          GET\_ACCESS\_DATA 35 %
+* GET_ACCESS_DATA 35 %
 
 **Write Transactions (20%)**
 
-•          UPDATE\_SUBSCRIBER\_DATA 2 %
+* UPDATE_SUBSCRIBER_DATA 2 %
 
-•          UPDATE\_LOCATION 14 %
+* UPDATE_LOCATION 14 %
 
-•          INSERT\_CALL\_FORWARDING 2 %
+* INSERT_CALL_FORWARDING 2 %
 
-•          DELETE\_CALL\_FORWARDING 2 %
+* DELETE_CALL_FORWARDING 2 %
 
 **VoltDB Implementation**
 
-From a VoltDB viewpoint the challenge here is how to handle transactions that access via sub\_nbr instead of the partitioned key s\_id.
+From a VoltDB viewpoint the challenge here is how to handle transactions that access via sub_nbr instead of the partitioned key s_id.
 
 The following transactions access via the partitioned key and are trivial to implement in VoltDB:
 
-•          GetSubscriberData
+* GetSubscriberData
 
-•          GetNewDestination
+* GetNewDestination
 
-•          GetAccessData
+* GetAccessData
 
-•          UpdateSubscriberData
+* UpdateSubscriberData
 
 These transactions represent 20% of the logical transactions, but use the synthetic Unique Key mandated by the benchmark:
 
-•          UpdateLocation
+* UpdateLocation
 
-•          InsertCallForwarding
+* InsertCallForwarding
 
-•          DeleteCallForwarding
+* DeleteCallForwarding
 
 From a VoltDB viewpoint our design choices were discussed above. We implemented the following:
 
-- &quot;FKMODE\_MULTI\_QUERY\_FIRST&quot; does a global read consistent query to find the row, and then follows up with a single partition update.
+- &quot;FKMODE_MULTI_QUERY_FIRST&quot; does a global read consistent query to find the row, and then follows up with a single partition update.
 
-- &quot;FKMODE\_QUERY\_ALL\_PARTITIONS\_FIRST&quot; asks each partition independently to find the row, and then follows up with a single partition update.
+- &quot;FKMODE_QUERY_ALL_PARTITIONS_FIRST&quot; asks each partition independently to find the row, and then follows up with a single partition update.
 
-- &quot;FKMODE\_TASK\_ALL\_PARTITIONS&quot; cuts out the middleman and asks each partition independently to try and update the row. Given that there is only one row and while the Unique ID is volatile it doesn&#39;t get reused this will work for this specific Use Case.
+- &quot;FKMODE_TASK_ALL_PARTITIONS&quot; cuts out the middleman and asks each partition independently to try and update the row. Given that there is only one row and while the Unique ID is volatile it doesn&#39;t get reused this will work for this specific Use Case.
 
 **What our benchmark does**
 
@@ -204,23 +204,23 @@ Our code stats by creating the test data if needed. It then runs our version of 
 
 For testing purposes we ran all 3 options above on the following configuration:
 
-•          AWS
+* AWS
 
-•         [ ](https://aws.amazon.com/ec2/instance-types/z1d/)[z1d.2xlarge](https://aws.amazon.com/ec2/instance-types/z1d/) - Intel Xeon, runs up to &#39;up to 4.0 GHz&#39;, 4 physical cores per server. Around US$0.25/hr.
+* [ ](https://aws.amazon.com/ec2/instance-types/z1d/)[z1d.2xlarge](https://aws.amazon.com/ec2/instance-types/z1d/) - Intel Xeon, runs up to &#39;up to 4.0 GHz&#39;, 4 physical cores per server. Around US$0.25/hr.
 
-•          3 nodes
+* 3 nodes
 
-•          k=1 (1 spare copy)
+* k=1 (1 spare copy)
 
-•          Snapshotting and command logging enabled.
+* Snapshotting and command logging enabled.
 
 Note that:
 
-•          All our transactions are ACID transactions
+* All our transactions are ACID transactions
 
-•          &#39;k=1&#39; ensures that all transactions take place on 2 nodes.
+* &#39;k=1&#39; ensures that all transactions take place on 2 nodes.
 
-•          &#39;z1d.2xlarge&#39; has 8 vCPUs, or 4 real ones.
+* &#39;z1d.2xlarge&#39; has 8 vCPUs, or 4 real ones.
 
 Results
 
