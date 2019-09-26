@@ -68,7 +68,7 @@ This is a variation on step &#39;4&#39;, except we just send &#39;writes&#39; to
 
 We go into detail about how our implementation works below, but a key takeaway is that not only is this a hard problem to solve, but the different possible solutions are all &#39;optimal&#39; depending on your Use Case.
 
-**The TATP Schema**
+## The TATP Schema
 
 The Schema looks like this:
 
@@ -76,7 +76,7 @@ The Schema looks like this:
 
 The documentation defines it as the following tables:
 
-**Subscriber Table**
+### Subscriber Table
 
 1. s_id is a unique number between 1 and N where N is the number of subscribers (the population size).Typically, the population sizes start at N=100,000 subscribers, and then N is multiplied by factors of 2, 5 and 10 and so forth, for each order of magnitude. During the population, s\_id is selected randomly from the set of allowed values.
 
@@ -90,7 +90,7 @@ The documentation defines it as the following tables:
 
 6. sc_location and vlr_location are randomly generated numbers between 1 and (232 – 1).
 
-**Access_Info Table**
+### Access_Info Table
 
 1. s_id references s_id in the Subscriber table.
 
@@ -104,7 +104,7 @@ The documentation defines it as the following tables:
 
 There are between 1 and 4 Access_Info records per Subscriber record, so that there are 25 % subscribers with one record, 25% with two records and so on.
 
-**Special_Facility Table**
+### Special_Facility Table
 
 1. s_id references _id in the Subscriber table.
 
@@ -118,7 +118,7 @@ There are between 1 and 4 Access_Info records per Subscriber record, so that the
 
 There are between 1 and 4 Special_Facility records per row in the Subscriber table, so that there are 25% subscribers with one record, 25% with two records and so on.
 
-**Call_Forwarding Table**
+### Call_Forwarding Table
 
 1. s_id and sf_type reference the corresponding fields in the Special_Facility table.
 
@@ -130,7 +130,7 @@ There are between 1 and 4 Special_Facility records per row in the Subscriber tab
 
 There are between zero and 3 Call_Forwarding records per Special_Facility row, so that there are 25 % Special_Facility records without a Call_Forwarding record, 25% with one record and so on. Because start_time is part of the primary key, every record must have different start_time.
 
-**Initial Data**
+### Initial Data
 
 The database is always freshly populated before each benchmark run. This ensures that runs are reproducible, and that each run starts with correct data distributions. The Subscriber table acts as the main table of the benchmark. After generating a subscriber row, its child records in the other tables are generated and inserted. The number of rows in the Subscriber table is used to scale the population size of the other tables. For example, a TATP with population size of 1,000,000 gives the following table cardinalities for the benchmark:
 
@@ -142,11 +142,11 @@ The database is always freshly populated before each benchmark run. This ensures
 
 * Call_Forwarding ≈ 3,750,000 rows
 
-**Transaction mixes**
+### Transaction mixes
 
 The basic TATP benchmark runs a mixture of seven (7) transactions issued by ten (10) independent clients. All the clients run the same transaction mixture with the same transaction probabilities as defined below.
 
-**Read Transactions (80%)**
+#### Read Transactions (80%)
 
 * GET_SUBSCRIBER_DATA 35 %
 
@@ -154,7 +154,7 @@ The basic TATP benchmark runs a mixture of seven (7) transactions issued by ten 
 
 * GET_ACCESS_DATA 35 %
 
-**Write Transactions (20%)**
+#### Write Transactions (20%)
 
 * UPDATE_SUBSCRIBER_DATA 2 %
 
@@ -164,7 +164,7 @@ The basic TATP benchmark runs a mixture of seven (7) transactions issued by ten 
 
 * DELETE_CALL_FORWARDING 2 %
 
-**VoltDB Implementation**
+## VoltDB Implementation
 
 From a VoltDB viewpoint the challenge here is how to handle transactions that access via sub_nbr instead of the partitioned key s_id.
 
@@ -194,13 +194,13 @@ From a VoltDB viewpoint our design choices were discussed above. We implemented 
 
 - &quot;FKMODE_TASK_ALL_PARTITIONS&quot; cuts out the middleman and asks each partition independently to try and update the row. Given that there is only one row and while the Unique ID is volatile it doesn&#39;t get reused this will work for this specific Use Case.
 
-**What our benchmark does**
+## What our benchmark does
 
 Our code stats by creating the test data if needed. It then runs our version of the benchmark for each implementation for 5 minutes. It starts at 2,000 TPS and then re-runs with 4,000, 6,000 , etc until the server can no longer get \&gt; 90% of requested transactions done or we hit some other reasons for stopping. We then look at the previous file and use the TPS it did as the result for that configuration. It does this for each of the three methods we discuss above. We produce an output log file which has detailed statistics for 1 of the 10 threads.
 
-**VoltDB results in AWS**
+## VoltDB results in AWS
 
-**Configuration**
+### Configuration
 
 For testing purposes we ran all 3 options above on the following configuration:
 
@@ -222,7 +222,7 @@ Note that:
 
 * &#39;z1d.2xlarge&#39; has 8 vCPUs, or 4 real ones.
 
-Results
+### Results
 
 The best result was obtained was when we asked all the partitions to do a read and then do an update once we&#39;ve found out where it is (FKMODE\_QUERY\_ALL\_PARTITIONS\_FIRST).  We were able to sustain 66,635 TPS while aiming for 68K. At that level the hardware wasn&#39;t maxed out, but the 99th percentile latency for our tricky &quot;Alternative Unique Key&quot; was still around 1ms. As we increased the workload it jumped to over 10ms, which is the point at which it will not be acceptable to customers.
 
@@ -235,12 +235,13 @@ Note that at 66,635 TPS for basic read and write operations latency is still 1ms
 In the graph below the X axis is the load we requested, the thick blue line is how ahy TPS we&#39;re doing (right axis). The performance of individual operations is on the left hand scale in milliseconds. Note that if for some reason you didn&#39;t care about latency you could get something more than 100K TPS.
 
 
+![Results](https://github.com/srmadscience/voltdb-tatpbenchmark/blob/master/results/stats_z1d.2xlarge.3nodes.k1.png "Results")
 
 
 
 Bear in mind this is on a generic AWS configuration without making any heroic attempts to maximize performance. Our goal is to create something that people evaluating VoltDB can do for themselves.This is not - and does not claim to be - the &#39;most&#39; VoltDB can get on this benchmark or on AWS.
 
-How to run this yourself
+## How to run this yourself
 
 1. Download and install VoltDB
 
@@ -266,16 +267,3 @@ sh scripts/runbenchmark.sh vdb1,vdb2,vdb3 mytest 20000000
 
 
 
-
-
-
-
-DO NOT PUBLISH THIS BIT:
-
-Notes on sequence diagrams:
-
-Done with [https://sequencediagram.org/#](https://sequencediagram.org/#)
-
-Can be saved as SVG, but google docs doesn&#39;t like it.
-
-The text that created the diagrams is in comments next to them.
