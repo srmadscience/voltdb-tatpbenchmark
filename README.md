@@ -250,7 +250,7 @@ Bear in mind this is on a generic AWS configuration without making any heroic at
 ```
 git clone [https://github.com/srmadscience/voltdb-tatpbenchmark](https://github.com/srmadscience/voltdb-tatpbenchmark)
 
-cd [voltdb-tatpbenchmark](https://github.com/srmadscience/voltdb-tatpbenchmark)
+cd voltdb-tatpbenchmark
 ```
 
 1. The script runbenchmark does a build, and then installs the schema and starts the benchmark:
