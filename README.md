@@ -30,11 +30,11 @@ What makes the TATP benchmark interesting is that fully 20% of the transactions 
 
 From an implementation perspective this is a non-trivial problem. It&#39;s not a VoltDB-specific problem. All horizontally sharded systems will have to make some awkward choices. The default list generally looks like this:
 
-1. Use a single, large server running a legacy RDBMS so you can do the search and write in one move.
+### 1. Use a single, large server running a legacy RDBMS so you can do the search and write in one move.
 
 This simply isn&#39;t going to work if you are obliged by the market to deploy on smaller, commodity hardware. In addition, most NoSQL/NewSQL products are around 10x faster than a legacy RDBMS. So a workload that would require 3 generic servers for NoSQL/NewSQL won&#39;t need  single server with 3x the power for a legacy RDBMS, it&#39;ll need to be 30x the power. Unsurprisingly, we don&#39;t bother testing this in our implementation.
 
-2. Maintain a separate index table/KV store and write to both at the same time.
+### 2. Maintain a separate index table/KV store and write to both at the same time.
 
 In the example below the Primary Key lives on Node 1. We create an index entry which looks like another record to the database.  For our purposes the index record lives on Node 2.
 
@@ -47,19 +47,19 @@ This will work and scale well, but has two serious problems:
 
 - The real problem is the complexity around error handling. What happens if one write works, but another fails? How do I &quot;uncorrupt&quot; the data? What do I do with incoming requests in the meantime? For these reasons we don&#39;t bother testing this in our implementation, although we might add this in a future iteration.
 
-3. Get your NewSQL/NoSQL store to do a global search, then do a write.
+### 3. Get your NewSQL/NoSQL store to do a global search, then do a write.
 
 ![Multi Query](https://github.com/srmadscience/voltdb-tatpbenchmark/blob/master/docs/multiquery.png "Multi Query")
 
 This assumes that there is such a thing as a global read in your environment. In VoltDB we handle this behind the scenes, but a single node will still be in charge of getting the other nodes to issue the query at the exact same moment in time. The &quot; **FKMODE\_MULTI\_QUERY\_FIRST**&quot; option in our implementation does such a read to turn the foreign key into a subscriber id, which is then used for the actual transaction. Under normal circumstances both events take well under a millisecond to complete, which means the time window when things can go wrong is very small.  The downside from a VoltDB perspective is that while what we call &quot;Multi Partition Reads&quot; are fast, they aren&#39;t nearly as fast as single partition transactions.
 
-4. Do a &#39;read&#39; to ask all possible locations if they recognize your unique key, one at a time.
+### 4. Do a &#39;read&#39; to ask all possible locations if they recognize your unique key, one at a time.
 
 ![Ask All](https://github.com/srmadscience/voltdb-tatpbenchmark/blob/master/docs/askall.png "Ask All")
 
 You can do your transaction once you know the subscriber\_id, so as a prerequisite you get the subscriber id by asking everyone if they recognize your Unique Key. This seems slightly crazy, but is actually viable, provided you&#39;re not trying to do this for every transaction. Obviously it creates problems for scalability, but before panicking we should see what kind of numbers we get and see if this is actually an issue. In the TATP benchmark 20% of transactions fall into this category. In our implementation this is the &quot; **FKMODE\_QUERY\_ALL\_PARTITIONS\_FIRST&quot;** _option_ **.**
 
-5. Ask all possible locations to do the update if they have an entry that matches the Unique Key.
+### 5. Ask all possible locations to do the update if they have an entry that matches the Unique Key.
 
 ![Do All](https://github.com/srmadscience/voltdb-tatpbenchmark/blob/master/docs/doall.png "Do All")
 
