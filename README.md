@@ -248,7 +248,7 @@ Bear in mind this is on a generic AWS configuration without making any heroic at
 1. All the code is in github ([https://github.com/srmadscience/voltdb-tatpbenchmark](https://github.com/srmadscience/voltdb-tatpbenchmark))  and is a maven project. So getting it is a case of:
 
 ```
-git clone https://github.com/srmadscience/voltdb-tatpbenchmark)
+git clone https://github.com/srmadscience/voltdb-tatpbenchmark
 
 cd voltdb-tatpbenchmark
 ```
