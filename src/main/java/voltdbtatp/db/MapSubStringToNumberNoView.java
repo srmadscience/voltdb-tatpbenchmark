@@ -29,14 +29,14 @@ import org.voltdb.VoltTable;
 
 public class MapSubStringToNumberNoView extends VoltProcedure {
 
-	public static final SQLStmt firstSelect = new SQLStmt(
-			"select s_id from subscriber where sub_nbr = ? order by s_id;");
-	
-	public VoltTable[] run(String subscriberIdString) throws VoltAbortException {
+    public static final SQLStmt firstSelect = new SQLStmt(
+            "select s_id from subscriber where sub_nbr = ? order by s_id;");
 
-		voltQueueSQL(firstSelect,subscriberIdString);
+    public VoltTable[] run(String subscriberIdString) throws VoltAbortException {
 
-		return voltExecuteSQL(true);
-	}
+        voltQueueSQL(firstSelect, subscriberIdString);
+
+        return voltExecuteSQL(true);
+    }
 
 }

@@ -28,43 +28,43 @@ import org.voltdb.client.Client;
 import org.voltdb.client.ClientResponse;
 import org.voltdb.voltutil.stats.SafeHistogramCache;
 
-public abstract class AbstactCallback  {
+public abstract class AbstactCallback {
 
-	final int MILLISECOND_STATS_SIZE = 10000;
-	final int MICROSECOND_STATS_SIZE = 1000000;
+    final int MILLISECOND_STATS_SIZE = 10000;
+    final int MICROSECOND_STATS_SIZE = 1000000;
 
-	long startTime = 0;
-	long startTimeNanos = 0;
-	int sid = 0;
-	SafeHistogramCache histCache = SafeHistogramCache.getInstance();
-	String callbackStatsCategory = null;
-	Client theClient = null;
+    long startTime = 0;
+    long startTimeNanos = 0;
+    int sid = 0;
+    SafeHistogramCache histCache = SafeHistogramCache.getInstance();
+    String callbackStatsCategory = null;
+    Client theClient = null;
 
-	public AbstactCallback(long startTime, long startTimeNanos, int sid,
-			String callbackStatsCategory, Client theClient) {
-		this.startTime = startTime;
-		this.startTimeNanos = startTimeNanos;
-		this.sid = sid;
-		this.callbackStatsCategory = callbackStatsCategory;
-		this.theClient = theClient;
+    public AbstactCallback(long startTime, long startTimeNanos, int sid, String callbackStatsCategory,
+            Client theClient) {
+        this.startTime = startTime;
+        this.startTimeNanos = startTimeNanos;
+        this.sid = sid;
+        this.callbackStatsCategory = callbackStatsCategory;
+        this.theClient = theClient;
 
-	}
+    }
 
-	public static int getSid(ClientResponse response) {
+    public static int getSid(ClientResponse response) {
 
-		int sid = -1;
+        int sid = -1;
 
-		if (response.getStatus() == ClientResponse.SUCCESS) {
+        if (response.getStatus() == ClientResponse.SUCCESS) {
 
-			VoltTable[] resultTables = response.getResults();
+            VoltTable[] resultTables = response.getResults();
 
-			if (resultTables[0].advanceRow()) {
-				sid = (int) resultTables[0].getLong("S_ID");
-			}
+            if (resultTables[0].advanceRow()) {
+                sid = (int) resultTables[0].getLong("S_ID");
+            }
 
-		} 
+        }
 
-		return sid;
+        return sid;
 
-	}
+    }
 }

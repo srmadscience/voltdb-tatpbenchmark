@@ -31,56 +31,56 @@ import org.voltdb.VoltTable;
 
 public class InsertCallForwardingMultiPartition extends VoltProcedure {
 
-  public static final SQLStmt getId = new SQLStmt("select s_id from subscriber where sub_nbr = ? order by s_id;");
+    public static final SQLStmt getId = new SQLStmt("select s_id from subscriber where sub_nbr = ? order by s_id;");
 
-  public static final SQLStmt querySpecialFacility = new SQLStmt(
-      "SELECT s_id, sf_type FROM Special_Facility WHERE s_id = ? ORDER BY sf_type;");
+    public static final SQLStmt querySpecialFacility = new SQLStmt(
+            "SELECT s_id, sf_type FROM Special_Facility WHERE s_id = ? ORDER BY sf_type;");
 
-  public static final SQLStmt delCallForwarding = new SQLStmt(
-      "DELETE FROM Call_Forwarding WHERE s_id = ? AND sf_type = ?  AND start_time = ?;");
+    public static final SQLStmt delCallForwarding = new SQLStmt(
+            "DELETE FROM Call_Forwarding WHERE s_id = ? AND sf_type = ?  AND start_time = ?;");
 
-  public static final SQLStmt insertCallForwarding = new SQLStmt(
-      "INSERT INTO call_forwarding (s_id,sf_type,start_time,end_time,numberx ) VALUES (?,?,?,?,?);");
+    public static final SQLStmt insertCallForwarding = new SQLStmt(
+            "INSERT INTO call_forwarding (s_id,sf_type,start_time,end_time,numberx ) VALUES (?,?,?,?,?);");
 
-  public VoltTable[] run(long unusedPartitionId, String subscriberFk, long bit1, long dataA, long sfType)
-      throws VoltAbortException {
+    public VoltTable[] run(long unusedPartitionId, String subscriberFk, long bit1, long dataA, long sfType)
+            throws VoltAbortException {
 
-    voltQueueSQL(getId, subscriberFk);
-    VoltTable[] IdMapping = voltExecuteSQL();
+        voltQueueSQL(getId, subscriberFk);
+        VoltTable[] IdMapping = voltExecuteSQL();
 
-    if (IdMapping[0].advanceRow()) {
-      long s_id = IdMapping[0].getLong("s_id");
+        if (IdMapping[0].advanceRow()) {
+            long s_id = IdMapping[0].getLong("s_id");
 
-      voltQueueSQL(querySpecialFacility, s_id);
+            voltQueueSQL(querySpecialFacility, s_id);
 
-      VoltTable[] firstOne = voltExecuteSQL();
+            VoltTable[] firstOne = voltExecuteSQL();
 
-      if (firstOne[0].advanceRow()) {
+            if (firstOne[0].advanceRow()) {
 
-        Random r = getSeededRandomNumberGenerator();
+                Random r = getSeededRandomNumberGenerator();
 
-        long sftype = firstOne[0].getLong("sf_type");
+                long sftype = firstOne[0].getLong("sf_type");
 
-        int j = r.nextInt(4);
+                int j = r.nextInt(4);
 
-        int startTime = 0;
+                int startTime = 0;
 
-        if (j == 1) {
-          startTime = 8;
-        } else if (j == 2) {
-          startTime = 16;
+                if (j == 1) {
+                    startTime = 8;
+                } else if (j == 2) {
+                    startTime = 16;
+                }
+
+                int endTime = startTime + 1 + r.nextInt(24);
+
+                voltQueueSQL(delCallForwarding, s_id, sftype, startTime);
+                voltQueueSQL(insertCallForwarding, s_id, sftype, startTime, endTime,
+                        LoadSubscriber.makeRandString(LoadSubscriber.ALPHABET, r, 15));
+            }
+
         }
 
-        int endTime = startTime + 1 + r.nextInt(24);
-
-        voltQueueSQL(delCallForwarding, s_id, sftype, startTime);
-        voltQueueSQL(insertCallForwarding, s_id, sftype, startTime, endTime,
-            LoadSubscriber.makeRandString(LoadSubscriber.ALPHABET, r, 15));
-      }
-
+        return voltExecuteSQL(true);
     }
-
-    return voltExecuteSQL(true);
-  }
 
 }

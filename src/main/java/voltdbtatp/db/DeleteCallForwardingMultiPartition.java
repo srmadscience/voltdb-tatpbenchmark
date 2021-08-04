@@ -29,30 +29,30 @@ import org.voltdb.VoltTable;
 
 public class DeleteCallForwardingMultiPartition extends VoltProcedure {
 
-  public static final SQLStmt find = new SQLStmt(
-      "select 1 how_many, s_id from subscriber where sub_nbr = ? order by s_id;");
+    public static final SQLStmt find = new SQLStmt(
+            "select 1 how_many, s_id from subscriber where sub_nbr = ? order by s_id;");
 
-  public static final SQLStmt delCallForwarding = new SQLStmt(
-      "DELETE FROM Call_Forwarding WHERE s_id = ? AND sf_type = ?  AND start_time = ?;");
+    public static final SQLStmt delCallForwarding = new SQLStmt(
+            "DELETE FROM Call_Forwarding WHERE s_id = ? AND sf_type = ?  AND start_time = ?;");
 
-  public VoltTable[] run(long unusedPartitionId, String subscriberFk, long sfType, long startTime)
-      throws VoltAbortException {
+    public VoltTable[] run(long unusedPartitionId, String subscriberFk, long sfType, long startTime)
+            throws VoltAbortException {
 
-    // See if record exists. We need to know for client-side checking.
-    // If it returns more than one row we have a problem, so throw
-    // an exception...
-    voltQueueSQL(find, EXPECT_ZERO_OR_ONE_ROW, subscriberFk);
+        // See if record exists. We need to know for client-side checking.
+        // If it returns more than one row we have a problem, so throw
+        // an exception...
+        voltQueueSQL(find, EXPECT_ZERO_OR_ONE_ROW, subscriberFk);
 
-    VoltTable[] existingRecord = voltExecuteSQL();
+        VoltTable[] existingRecord = voltExecuteSQL();
 
-    if (existingRecord[0].advanceRow()) {
-      long s_id = existingRecord[0].getLong("S_ID");
-      voltQueueSQL(delCallForwarding, s_id, sfType, startTime);
-      voltExecuteSQL(true);
+        if (existingRecord[0].advanceRow()) {
+            long s_id = existingRecord[0].getLong("S_ID");
+            voltQueueSQL(delCallForwarding, s_id, sfType, startTime);
+            voltExecuteSQL(true);
 
+        }
+
+        return existingRecord;
     }
-
-    return existingRecord;
-  }
 
 }

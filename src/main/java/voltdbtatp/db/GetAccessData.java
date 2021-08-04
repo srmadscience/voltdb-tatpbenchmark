@@ -29,14 +29,14 @@ import org.voltdb.VoltTable;
 
 public class GetAccessData extends VoltProcedure {
 
-  public static final SQLStmt accessDataSelect = new SQLStmt(
-      "SELECT data1, data2, data3, data4 FROM Access_Info WHERE s_id = ? AND ai_type = ?");
+    public static final SQLStmt accessDataSelect = new SQLStmt(
+            "SELECT data1, data2, data3, data4 FROM Access_Info WHERE s_id = ? AND ai_type = ?");
 
-  public VoltTable[] run(long subscriberId, long aiType) throws VoltAbortException {
+    public VoltTable[] run(long subscriberId, long aiType) throws VoltAbortException {
 
-    voltQueueSQL(accessDataSelect, subscriberId, aiType);
+        voltQueueSQL(accessDataSelect, subscriberId, aiType);
 
-    return voltExecuteSQL(true);
-  }
+        return voltExecuteSQL(true);
+    }
 
 }

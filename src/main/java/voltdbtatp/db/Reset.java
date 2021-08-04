@@ -29,19 +29,19 @@ import org.voltdb.VoltTable;
 
 public class Reset extends VoltProcedure {
 
-	public static final SQLStmt d1 = new SQLStmt("DELETE FROM special_facility;");
-	public static final SQLStmt d2 = new SQLStmt("DELETE FROM access_info;");
-	public static final SQLStmt d3 = new SQLStmt("DELETE FROM subscriber;");
-	public static final SQLStmt d4 = new SQLStmt("DELETE FROM call_forwarding ;");
+    public static final SQLStmt d1 = new SQLStmt("DELETE FROM special_facility;");
+    public static final SQLStmt d2 = new SQLStmt("DELETE FROM access_info;");
+    public static final SQLStmt d3 = new SQLStmt("DELETE FROM subscriber;");
+    public static final SQLStmt d4 = new SQLStmt("DELETE FROM call_forwarding ;");
 
-	public VoltTable[] run() throws VoltAbortException {
+    public VoltTable[] run() throws VoltAbortException {
 
-		voltQueueSQL(d1);
-		voltQueueSQL(d2);
-		voltQueueSQL(d3);
-		voltQueueSQL(d4);
+        voltQueueSQL(d1);
+        voltQueueSQL(d2);
+        voltQueueSQL(d3);
+        voltQueueSQL(d4);
 
-		return voltExecuteSQL(true);
-	}
+        return voltExecuteSQL(true);
+    }
 
 }

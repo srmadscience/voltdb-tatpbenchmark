@@ -29,13 +29,12 @@ import org.voltdb.VoltTable;
 
 public class UpdateLocationMultiPartition extends VoltProcedure {
 
-	public static final SQLStmt updateSub = new SQLStmt(
-			"UPDATE Subscriber SET vlr_location = ? WHERE sub_nbr = ?;");
+    public static final SQLStmt updateSub = new SQLStmt("UPDATE Subscriber SET vlr_location = ? WHERE sub_nbr = ?;");
 
-	public VoltTable[] run(long unusedPartitionId, String fk, long locationId) throws VoltAbortException {
+    public VoltTable[] run(long unusedPartitionId, String fk, long locationId) throws VoltAbortException {
 
-		voltQueueSQL(updateSub, locationId, fk);
-		return voltExecuteSQL(true);
-	}
+        voltQueueSQL(updateSub, locationId, fk);
+        return voltExecuteSQL(true);
+    }
 
 }

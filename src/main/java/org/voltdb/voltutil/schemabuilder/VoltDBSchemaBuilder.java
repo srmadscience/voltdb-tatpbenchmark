@@ -47,218 +47,221 @@ import org.voltdb.client.ProcCallException;
  */
 public final class VoltDBSchemaBuilder {
 
-  private static final String PROCEDURE = "Procedure ";
-  private static final String WAS_NOT_FOUND = " was not found";
+    private static final String PROCEDURE = "Procedure ";
+    private static final String WAS_NOT_FOUND = " was not found";
 
-  private final String jarFileName = "ycsb-procs.jar";
+    private final String jarFileName = "ycsb-procs.jar";
 
-  private Logger logger = LoggerFactory.getLogger(VoltDBSchemaBuilder.class);
+    private Logger logger = LoggerFactory.getLogger(VoltDBSchemaBuilder.class);
 
-  Client voltClient;
+    Client voltClient;
 
-  private String[] ddlStatements;
+    private String[] ddlStatements;
 
-  private String[] procStatements;
+    private String[] procStatements;
 
-  private String[] jarFiles;
-  
-  String procPackageName;
+    private String[] jarFiles;
 
-  /**
-   * Utility class to build the schema.
-   * 
-   * @author srmadscience / VoltDB
-   *
-   */
-  public VoltDBSchemaBuilder(String[] ddlStatements, String[] procStatements, String jarFileName, Client voltClient, String procPackageName) {
-    super();
-    this.ddlStatements = ddlStatements;
-    this.procStatements = procStatements;
-    this.voltClient = voltClient;
-    this.procPackageName = procPackageName;
-    
-    jarFiles = makeJarFiles(procStatements);
-  }
+    String procPackageName;
 
-  /**
-   * Method to take an array of "CREATE PROCEDURE" statements and 
-   * return a list of the class files they are talking about.
-   * @param procStatements
-   * @return a list of the class files they are talking about.
-   */
-  private String[] makeJarFiles(String[] procStatements) {
+    /**
+     * Utility class to build the schema.
+     * 
+     * @author srmadscience / VoltDB
+     *
+     */
+    public VoltDBSchemaBuilder(String[] ddlStatements, String[] procStatements, String jarFileName, Client voltClient,
+            String procPackageName) {
+        super();
+        this.ddlStatements = ddlStatements;
+        this.procStatements = procStatements;
+        this.voltClient = voltClient;
+        this.procPackageName = procPackageName;
 
-    ArrayList<String> jarFileAL = new ArrayList<String>();
+        jarFiles = makeJarFiles(procStatements);
+    }
 
-    for (int i = 0; i < procStatements.length; i++) {
+    /**
+     * Method to take an array of "CREATE PROCEDURE" statements and return a list of
+     * the class files they are talking about.
+     * 
+     * @param procStatements
+     * @return a list of the class files they are talking about.
+     */
+    private String[] makeJarFiles(String[] procStatements) {
 
-       String thisProcStringNoNewLines = procStatements[i].toUpperCase().replace(System.lineSeparator(), " ");
+        ArrayList<String> jarFileAL = new ArrayList<String>();
 
-      if (thisProcStringNoNewLines.indexOf(" FROM CLASS ") > -1) {
-        String[] thisProcStringAsWords = procStatements[i].replace(".", " ").split(" ");
+        for (int i = 0; i < procStatements.length; i++) {
 
-        if (thisProcStringAsWords[thisProcStringAsWords.length - 1].endsWith(";")) {
-          jarFileAL.add(thisProcStringAsWords[thisProcStringAsWords.length - 1].replace(";", ""));
+            String thisProcStringNoNewLines = procStatements[i].toUpperCase().replace(System.lineSeparator(), " ");
 
-        } else {
-          logger.error("Parsing of '" + procStatements[i] + "' went wrong; can't find proc name");
+            if (thisProcStringNoNewLines.indexOf(" FROM CLASS ") > -1) {
+                String[] thisProcStringAsWords = procStatements[i].replace(".", " ").split(" ");
+
+                if (thisProcStringAsWords[thisProcStringAsWords.length - 1].endsWith(";")) {
+                    jarFileAL.add(thisProcStringAsWords[thisProcStringAsWords.length - 1].replace(";", ""));
+
+                } else {
+                    logger.error("Parsing of '" + procStatements[i] + "' went wrong; can't find proc name");
+                }
+
+            }
         }
 
-      }
+        String[] jarFileList = new String[jarFileAL.size()];
+        jarFileList = jarFileAL.toArray(jarFileList);
+
+        return jarFileList;
     }
 
-    String[] jarFileList = new String[jarFileAL.size()];
-    jarFileList = jarFileAL.toArray(jarFileList);
+    /**
+     * See if we think Schema already exists...
+     * 
+     * @return true if the 'Get' procedure exists and takes one string as a
+     *         parameter.
+     */
+    public boolean schemaExists(String testProcName, Object[] testParams) {
 
-    return jarFileList;
-  }
+        boolean schemaExists = false;
 
-  /**
-   * See if we think Schema already exists...
-   * 
-   * @return true if the 'Get' procedure exists and takes one string as a
-   *         parameter.
-   */
-  public boolean schemaExists(String testProcName, Object[] testParams) {
+        try {
+            ClientResponse response = voltClient.callProcedure(testProcName, testParams);
 
-    boolean schemaExists = false;
+            if (response.getStatus() == ClientResponse.SUCCESS) {
+                // Database exists...
+                schemaExists = true;
+            } else {
+                // If we'd connected to a copy of VoltDB without the schema and tried to
+                // call Get
+                // we'd have got a ProcCallException
+                logger.error("Error while calling schemaExists(): " + response.getStatusString());
+                schemaExists = false;
+            }
+        } catch (ProcCallException pce) {
+            schemaExists = false;
 
-    try {
-      ClientResponse response = voltClient.callProcedure(testProcName, testParams);
+            // Sanity check: Make sure we've got the *right* ProcCallException...
+            if (!pce.getMessage().equals(PROCEDURE + testProcName + WAS_NOT_FOUND)) {
+                logger.error("Got unexpected Exception while calling schemaExists()", pce);
+            }
 
-      if (response.getStatus() == ClientResponse.SUCCESS) {
-        // Database exists...
-        schemaExists = true;
-      } else {
-        // If we'd connected to a copy of VoltDB without the schema and tried to
-        // call Get
-        // we'd have got a ProcCallException
-        logger.error("Error while calling schemaExists(): " + response.getStatusString());
-        schemaExists = false;
-      }
-    } catch (ProcCallException pce) {
-      schemaExists = false;
+        } catch (Exception e) {
+            logger.error("Error while creating classes.", e);
+            schemaExists = false;
+        }
 
-      // Sanity check: Make sure we've got the *right* ProcCallException...
-      if (!pce.getMessage().equals(PROCEDURE + testProcName + WAS_NOT_FOUND)) {
-        logger.error("Got unexpected Exception while calling schemaExists()", pce);
-      }
-
-    } catch (Exception e) {
-      logger.error("Error while creating classes.", e);
-      schemaExists = false;
+        return schemaExists;
     }
 
-    return schemaExists;
-  }
+    /**
+     * Load classes and DDL required by YCSB.
+     * 
+     * @throws Exception
+     */
+    public synchronized void loadClassesAndDDLIfNeeded(String testProcName, Object[] testParams) throws Exception {
 
-  /**
-   * Load classes and DDL required by YCSB.
-   * 
-   * @throws Exception
-   */
-  public synchronized void loadClassesAndDDLIfNeeded(String testProcName, Object[] testParams) throws Exception {
+        if (schemaExists(testProcName, testParams)) {
+            return;
+        }
 
-    if (schemaExists(testProcName, testParams)) {
-      return;
-    }
+        File tempDir = Files.createTempDirectory("voltdbSchema").toFile();
 
-    File tempDir = Files.createTempDirectory("voltdbSchema").toFile();
+        if (!tempDir.canWrite()) {
+            throw new Exception("Temp Directory (from Files.createTempDirectory()) '" + tempDir.getAbsolutePath()
+                    + "' is not writable");
+        }
 
-    if (!tempDir.canWrite()) {
-      throw new Exception(
-          "Temp Directory (from Files.createTempDirectory()) '" + tempDir.getAbsolutePath() + "' is not writable");
-    }
+        ClientResponse cr;
 
-    ClientResponse cr;
+        for (int i = 0; i < ddlStatements.length; i++) {
+            try {
+                cr = voltClient.callProcedure("@AdHoc", ddlStatements[i]);
+                if (cr.getStatus() != ClientResponse.SUCCESS) {
+                    throw new Exception("Attempt to execute '" + ddlStatements[i] + "' failed:" + cr.getStatusString());
+                }
+                logger.info(ddlStatements[i]);
+            } catch (Exception e) {
 
-    for (int i = 0; i < ddlStatements.length; i++) {
-      try {
-        cr = voltClient.callProcedure("@AdHoc", ddlStatements[i]);
+                if (e.getMessage().indexOf("object name already exists") > -1) {
+                    // Someone else has done this...
+                    return;
+                }
+
+                throw (e);
+            }
+        }
+
+        logger.info("Creating JAR file in " + tempDir + File.separator + jarFileName);
+        Manifest manifest = new Manifest();
+        manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
+        JarOutputStream newJarFile = new JarOutputStream(new FileOutputStream(tempDir + File.separator + jarFileName),
+                manifest);
+
+        for (int i = 0; i < jarFiles.length; i++) {
+            InputStream is = getClass()
+                    .getResourceAsStream("/" + procPackageName.replace(".", "/") + "/" + jarFiles[i] + ".class");
+            logger.info("processing " + procPackageName.replace(".", "/") + "/" + jarFiles[i]);
+            add(procPackageName.replace(".", "/") + "/" + jarFiles[i] + ".class", is, newJarFile);
+        }
+
+        newJarFile.close();
+        File file = new File(tempDir + File.separator + jarFileName);
+
+        byte[] jarFileContents = new byte[(int) file.length()];
+        FileInputStream fis = new FileInputStream(file);
+        fis.read(jarFileContents);
+        fis.close();
+        logger.info("Calling @UpdateClasses to load JAR file containing procedures");
+
+        cr = voltClient.callProcedure("@UpdateClasses", jarFileContents, null);
         if (cr.getStatus() != ClientResponse.SUCCESS) {
-          throw new Exception("Attempt to execute '" + ddlStatements[i] + "' failed:" + cr.getStatusString());
-        }
-        logger.info(ddlStatements[i]);
-      } catch (Exception e) {
-
-        if (e.getMessage().indexOf("object name already exists") > -1) {
-          // Someone else has done this...
-          return;
+            throw new Exception("Attempt to execute UpdateClasses failed:" + cr.getStatusString());
         }
 
-        throw (e);
-      }
-    }
-
-    logger.info("Creating JAR file in " + tempDir + File.separator + jarFileName);
-    Manifest manifest = new Manifest();
-    manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
-    JarOutputStream newJarFile = new JarOutputStream(new FileOutputStream(tempDir + File.separator + jarFileName),
-        manifest);
-
-    for (int i = 0; i < jarFiles.length; i++) {
-      InputStream is = getClass().getResourceAsStream("/" + procPackageName.replace(".", "/") + "/" + jarFiles[i] + ".class");
-      logger.info("processing " + procPackageName.replace(".", "/") + "/" + jarFiles[i]);
-      add(procPackageName.replace(".", "/") + "/" + jarFiles[i]+ ".class", is, newJarFile);
-    }
-
-    newJarFile.close();
-    File file = new File(tempDir + File.separator + jarFileName);
-
-    byte[] jarFileContents = new byte[(int) file.length()];
-    FileInputStream fis = new FileInputStream(file);
-    fis.read(jarFileContents);
-    fis.close();
-    logger.info("Calling @UpdateClasses to load JAR file containing procedures");
-
-    cr = voltClient.callProcedure("@UpdateClasses", jarFileContents, null);
-    if (cr.getStatus() != ClientResponse.SUCCESS) {
-      throw new Exception("Attempt to execute UpdateClasses failed:" + cr.getStatusString());
-    }
-
-    for (int i = 0; i < procStatements.length; i++) {
-      logger.info(procStatements[i]);
-      cr = voltClient.callProcedure("@AdHoc", procStatements[i]);
-      if (cr.getStatus() != ClientResponse.SUCCESS) {
-        throw new Exception("Attempt to execute '" + procStatements[i] + "' failed:" + cr.getStatusString());
-      }
-    }
-
-  }
-
-  /**
-   * Add an entry to our JAR file.
-   * 
-   * @param fileName
-   * @param source
-   * @param target
-   * @throws IOException
-   */
-  private void add(String fileName, InputStream source, JarOutputStream target) throws IOException {
-    BufferedInputStream in = null;
-    try {
-
-      JarEntry entry = new JarEntry(fileName.replace("\\", "/"));
-      entry.setTime(System.currentTimeMillis());
-      target.putNextEntry(entry);
-      in = new BufferedInputStream(source);
-
-      byte[] buffer = new byte[1024];
-      while (true) {
-        int count = in.read(buffer);
-        if (count == -1) {
-          break;
+        for (int i = 0; i < procStatements.length; i++) {
+            logger.info(procStatements[i]);
+            cr = voltClient.callProcedure("@AdHoc", procStatements[i]);
+            if (cr.getStatus() != ClientResponse.SUCCESS) {
+                throw new Exception("Attempt to execute '" + procStatements[i] + "' failed:" + cr.getStatusString());
+            }
         }
 
-        target.write(buffer, 0, count);
-      }
-      target.closeEntry();
-    } finally {
-      if (in != null) {
-        in.close();
-      }
-
     }
-  }
+
+    /**
+     * Add an entry to our JAR file.
+     * 
+     * @param fileName
+     * @param source
+     * @param target
+     * @throws IOException
+     */
+    private void add(String fileName, InputStream source, JarOutputStream target) throws IOException {
+        BufferedInputStream in = null;
+        try {
+
+            JarEntry entry = new JarEntry(fileName.replace("\\", "/"));
+            entry.setTime(System.currentTimeMillis());
+            target.putNextEntry(entry);
+            in = new BufferedInputStream(source);
+
+            byte[] buffer = new byte[1024];
+            while (true) {
+                int count = in.read(buffer);
+                if (count == -1) {
+                    break;
+                }
+
+                target.write(buffer, 0, count);
+            }
+            target.closeEntry();
+        } finally {
+            if (in != null) {
+                in.close();
+            }
+
+        }
+    }
 
 }

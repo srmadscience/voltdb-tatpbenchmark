@@ -29,31 +29,31 @@ import org.voltdb.voltutil.stats.SafeHistogramCache;
 
 public class VoltProcedureUpdateCallBack implements ProcedureCallback {
 
-	int dupCount = 0;
+    int dupCount = 0;
     SafeHistogramCache histCache = SafeHistogramCache.getInstance();
 
+    @Override
+    public void clientCallback(ClientResponse response) {
 
-	public void clientCallback(ClientResponse response) {
+        // Make sure the procedure succeeded.
+        if (response.getStatus() != ClientResponse.SUCCESS) {
 
-		// Make sure the procedure succeeded.
-		if (response.getStatus() != ClientResponse.SUCCESS) {
+            if (response.getStatusString().indexOf("CONSTRAINT VIOLATION") > -1) {
+                dupCount++;
+            } else {
 
-			if (response.getStatusString().indexOf("CONSTRAINT VIOLATION") > -1) {
-				dupCount++;
-			} else {
+                histCache.incCounter("ERROR");
+            }
 
-			    histCache.incCounter("ERROR");
-			}
+        }
 
-		}
+    }
 
-	}
+    public int getDupCount() {
+        return dupCount;
+    }
 
-	public int getDupCount() {
-		return dupCount;
-	}
-
-	public void setDupCount(int dupCount) {
-		this.dupCount = dupCount;
-	}
+    public void setDupCount(int dupCount) {
+        this.dupCount = dupCount;
+    }
 }

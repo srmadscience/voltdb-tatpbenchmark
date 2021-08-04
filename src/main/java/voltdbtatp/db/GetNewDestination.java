@@ -27,24 +27,19 @@ import org.voltdb.SQLStmt;
 import org.voltdb.VoltProcedure;
 import org.voltdb.VoltTable;
 
-
 public class GetNewDestination extends VoltProcedure {
 
-	public static final SQLStmt getNewDestSelect = new SQLStmt("SELECT addCallForwarding.numberx "
-         + " FROM Special_Facility AS sf, Call_Forwarding AS addCallForwarding "
-         + "WHERE sf.s_id = ? "
-         + "AND sf.sf_type = ? "
-         + "AND sf.is_active = 1 "
-         + "AND addCallForwarding.s_id = sf.s_id "
-         + "AND addCallForwarding.sf_type = sf.sf_type "
-         + "AND addCallForwarding.start_time <= ? "
-         + "AND ? < addCallForwarding.end_time;");
-     
-  public VoltTable[] run(long subscriberId, long sfType, long st, long ed) throws VoltAbortException {
+    public static final SQLStmt getNewDestSelect = new SQLStmt(
+            "SELECT addCallForwarding.numberx " + " FROM Special_Facility AS sf, Call_Forwarding AS addCallForwarding "
+                    + "WHERE sf.s_id = ? " + "AND sf.sf_type = ? " + "AND sf.is_active = 1 "
+                    + "AND addCallForwarding.s_id = sf.s_id " + "AND addCallForwarding.sf_type = sf.sf_type "
+                    + "AND addCallForwarding.start_time <= ? " + "AND ? < addCallForwarding.end_time;");
 
-    voltQueueSQL(getNewDestSelect, subscriberId, sfType, st, ed);
+    public VoltTable[] run(long subscriberId, long sfType, long st, long ed) throws VoltAbortException {
 
-    return voltExecuteSQL(true);
-  }
+        voltQueueSQL(getNewDestSelect, subscriberId, sfType, st, ed);
+
+        return voltExecuteSQL(true);
+    }
 
 }

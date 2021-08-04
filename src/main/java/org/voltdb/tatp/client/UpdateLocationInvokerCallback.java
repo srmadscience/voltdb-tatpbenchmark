@@ -32,31 +32,32 @@ import org.voltdb.client.ClientResponse;
 
 public class UpdateLocationInvokerCallback extends BaseCallback {
 
-  private static Logger logger = LoggerFactory.getLogger(UpdateLocationInvokerCallback.class);
-  long newLocation = 0;
+    private static Logger logger = LoggerFactory.getLogger(UpdateLocationInvokerCallback.class);
+    long newLocation = 0;
 
-  public UpdateLocationInvokerCallback(long startTime, long startTimeNanos, int sid, String callbackStatsCategory,
-      long newLocation, Client c) {
-    super(startTime, startTimeNanos, sid, callbackStatsCategory, c, false);
-    this.newLocation = newLocation;
+    public UpdateLocationInvokerCallback(long startTime, long startTimeNanos, int sid, String callbackStatsCategory,
+            long newLocation, Client c) {
+        super(startTime, startTimeNanos, sid, callbackStatsCategory, c, false);
+        this.newLocation = newLocation;
 
-  }
-
-  @Override
-  public void clientCallback(ClientResponse response) {
-
-    super.clientCallback(response);
-
-    int sid = getSid(response);
-
-    BaseCallback c2 = new BaseCallback(startTime, startTimeNanos, sid, callbackStatsCategory + "_2", theClient, true);
-
-    try {
-      theClient.callProcedure(c2, "UpdateLocation", sid, newLocation);
-    } catch (IOException e) {
-      logger.error(e.getMessage());
     }
 
-  }
+    @Override
+    public void clientCallback(ClientResponse response) {
+
+        super.clientCallback(response);
+
+        int sid = getSid(response);
+
+        BaseCallback c2 = new BaseCallback(startTime, startTimeNanos, sid, callbackStatsCategory + "_2", theClient,
+                true);
+
+        try {
+            theClient.callProcedure(c2, "UpdateLocation", sid, newLocation);
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+        }
+
+    }
 
 }

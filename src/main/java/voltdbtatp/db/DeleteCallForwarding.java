@@ -29,14 +29,14 @@ import org.voltdb.VoltTable;
 
 public class DeleteCallForwarding extends VoltProcedure {
 
-  public static final SQLStmt delCallForwarding = new SQLStmt(
-      "DELETE FROM Call_Forwarding WHERE s_id = ? AND sf_type = ?  AND start_time = ?;");
+    public static final SQLStmt delCallForwarding = new SQLStmt(
+            "DELETE FROM Call_Forwarding WHERE s_id = ? AND sf_type = ?  AND start_time = ?;");
 
-  public VoltTable[] run(long subscriberId, long sfType, long startTime) throws VoltAbortException {
+    public VoltTable[] run(long subscriberId, long sfType, long startTime) throws VoltAbortException {
 
-    voltQueueSQL(delCallForwarding, subscriberId, sfType, startTime);
+        voltQueueSQL(delCallForwarding, subscriberId, sfType, startTime);
 
-    return voltExecuteSQL(true);
-  }
+        return voltExecuteSQL(true);
+    }
 
 }

@@ -32,53 +32,53 @@ import org.voltdb.client.ClientResponseWithPartitionKey;
 
 public class InsertCallForwardingInvokerCallbackNoView extends BaseMPCallback {
 
-  private static Logger logger = LoggerFactory.getLogger(InsertCallForwardingInvokerCallbackNoView.class);
+    private static Logger logger = LoggerFactory.getLogger(InsertCallForwardingInvokerCallbackNoView.class);
 
-	int randomBit = 0;
-	int randomData = 0;
-	int randomSfType = 0;
+    int randomBit = 0;
+    int randomData = 0;
+    int randomSfType = 0;
 
-	public InsertCallForwardingInvokerCallbackNoView(long startTime, long startTimeNanos, int sid, 
-			String callbackStatsCategory, Client c, int randomBit, int randomData, int randomSfType) {
+    public InsertCallForwardingInvokerCallbackNoView(long startTime, long startTimeNanos, int sid,
+            String callbackStatsCategory, Client c, int randomBit, int randomData, int randomSfType) {
 
-		super(startTime, startTimeNanos, sid,  callbackStatsCategory, c,false);
-		this.randomBit = randomBit;
-		this.randomData = randomData;
-		this.randomSfType = randomSfType;
+        super(startTime, startTimeNanos, sid, callbackStatsCategory, c, false);
+        this.randomBit = randomBit;
+        this.randomData = randomData;
+        this.randomSfType = randomSfType;
 
-	}
+    }
 
-	@Override
-	public void clientCallback(ClientResponseWithPartitionKey[] response) {
+    @Override
+    public void clientCallback(ClientResponseWithPartitionKey[] response) {
 
-		try {
-			super.clientCallback(response);
-		} catch (Exception e1) {
-		  logger.error(e1.getMessage());
-		}
+        try {
+            super.clientCallback(response);
+        } catch (Exception e1) {
+            logger.error(e1.getMessage());
+        }
 
-		for (int i = 0; i < response.length; i++) {
+        for (int i = 0; i < response.length; i++) {
 
-			int sid = getSid(response[i].response);
+            int sid = getSid(response[i].response);
 
-			if (sid > -1) {
-				break;
-			}
-		}
+            if (sid > -1) {
+                break;
+            }
+        }
 
-		if (sid > -1) {
-			BaseCallback c2 = new BaseCallback(startTime, startTimeNanos, sid,callbackStatsCategory + "_2",
-					theClient,true);
+        if (sid > -1) {
+            BaseCallback c2 = new BaseCallback(startTime, startTimeNanos, sid, callbackStatsCategory + "_2", theClient,
+                    true);
 
-			try {
-				theClient.callProcedure(c2, "InsertCallForwarding", sid, randomBit, randomData, randomSfType);
-			} catch (IOException e) {
-			  logger.error(e.getMessage());
-			}
+            try {
+                theClient.callProcedure(c2, "InsertCallForwarding", sid, randomBit, randomData, randomSfType);
+            } catch (IOException e) {
+                logger.error(e.getMessage());
+            }
 
-		} else {
-		  logger.error("Error: Unable to map SID");
-		}
-	}
+        } else {
+            logger.error("Error: Unable to map SID");
+        }
+    }
 
 }

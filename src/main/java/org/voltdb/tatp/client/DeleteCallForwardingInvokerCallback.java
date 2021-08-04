@@ -32,34 +32,35 @@ import org.voltdb.client.ClientResponse;
 
 public class DeleteCallForwardingInvokerCallback extends BaseCallback {
 
-  private static Logger logger = LoggerFactory.getLogger(DeleteCallForwardingInvokerCallback.class);
+    private static Logger logger = LoggerFactory.getLogger(DeleteCallForwardingInvokerCallback.class);
 
-  long randomStartTime = 0;
-  int randomSfType = 0;
+    long randomStartTime = 0;
+    int randomSfType = 0;
 
-  public DeleteCallForwardingInvokerCallback(long startTime, long startTimeNanos, int sid, String callbackStatsCategory,
-      Client c, long randomStartTime, int randomSfType) {
+    public DeleteCallForwardingInvokerCallback(long startTime, long startTimeNanos, int sid,
+            String callbackStatsCategory, Client c, long randomStartTime, int randomSfType) {
 
-    super(startTime, startTimeNanos, sid, callbackStatsCategory, c, false);
-    this.randomStartTime = randomStartTime;
-    this.randomSfType = randomSfType;
+        super(startTime, startTimeNanos, sid, callbackStatsCategory, c, false);
+        this.randomStartTime = randomStartTime;
+        this.randomSfType = randomSfType;
 
-  }
-
-  @Override
-  public void clientCallback(ClientResponse response) {
-
-    super.clientCallback(response);
-
-    int sid = getSid(response);
-    BaseCallback c2 = new BaseCallback(startTime, startTimeNanos, sid, callbackStatsCategory + "_2", theClient, true);
-
-    try {
-      theClient.callProcedure(c2, "DeleteCallForwarding", sid, randomSfType, randomStartTime);
-    } catch (IOException e) {
-      logger.error(e.getMessage());
     }
 
-  }
+    @Override
+    public void clientCallback(ClientResponse response) {
+
+        super.clientCallback(response);
+
+        int sid = getSid(response);
+        BaseCallback c2 = new BaseCallback(startTime, startTimeNanos, sid, callbackStatsCategory + "_2", theClient,
+                true);
+
+        try {
+            theClient.callProcedure(c2, "DeleteCallForwarding", sid, randomSfType, randomStartTime);
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+        }
+
+    }
 
 }

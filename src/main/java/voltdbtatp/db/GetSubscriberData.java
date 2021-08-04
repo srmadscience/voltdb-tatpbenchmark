@@ -23,31 +23,23 @@ package voltdbtatp.db;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-
 import org.voltdb.SQLStmt;
 import org.voltdb.VoltProcedure;
 import org.voltdb.VoltTable;
 
-
 public class GetSubscriberData extends VoltProcedure {
 
-	public static final SQLStmt firstSelect = new SQLStmt("SELECT s_id, sub_nbr, "
-     +" bit_1, bit_2, bit_3, bit_4, bit_5, bit_6, bit_7, "
-     +"bit_8, bit_9, bit_10, "
-     +"hex_1, hex_2, hex_3, hex_4, hex_5, hex_6, hex_7, "
-     +"hex_8, hex_9, hex_10, "
-     +"byte2_1, byte2_2, byte2_3, byte2_4, byte2_5, "
-     +"byte2_6, byte2_7, byte2_8, byte2_9, byte2_10, "
-     +"msc_location, vlr_location "
-     +"FROM Subscriber "
-     +"WHERE s_id = ?;");
-     
+    public static final SQLStmt firstSelect = new SQLStmt(
+            "SELECT s_id, sub_nbr, " + " bit_1, bit_2, bit_3, bit_4, bit_5, bit_6, bit_7, " + "bit_8, bit_9, bit_10, "
+                    + "hex_1, hex_2, hex_3, hex_4, hex_5, hex_6, hex_7, " + "hex_8, hex_9, hex_10, "
+                    + "byte2_1, byte2_2, byte2_3, byte2_4, byte2_5, " + "byte2_6, byte2_7, byte2_8, byte2_9, byte2_10, "
+                    + "msc_location, vlr_location " + "FROM Subscriber " + "WHERE s_id = ?;");
 
-  public VoltTable[] run(long subscriberId) throws VoltAbortException {
+    public VoltTable[] run(long subscriberId) throws VoltAbortException {
 
-    voltQueueSQL(firstSelect, subscriberId);
+        voltQueueSQL(firstSelect, subscriberId);
 
-    return voltExecuteSQL(true);
-  }
+        return voltExecuteSQL(true);
+    }
 
 }

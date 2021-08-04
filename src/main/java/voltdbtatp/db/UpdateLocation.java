@@ -29,14 +29,13 @@ import org.voltdb.VoltTable;
 
 public class UpdateLocation extends VoltProcedure {
 
-	public static final SQLStmt updateSub = new SQLStmt(
-			"UPDATE Subscriber SET vlr_location = ? WHERE s_id = ?;");
+    public static final SQLStmt updateSub = new SQLStmt("UPDATE Subscriber SET vlr_location = ? WHERE s_id = ?;");
 
-	public VoltTable[] run(long subscriberId, long locationId) throws VoltAbortException {
+    public VoltTable[] run(long subscriberId, long locationId) throws VoltAbortException {
 
-		voltQueueSQL(updateSub, locationId, subscriberId);
+        voltQueueSQL(updateSub, locationId, subscriberId);
 
-		return voltExecuteSQL(true);
-	}
+        return voltExecuteSQL(true);
+    }
 
 }

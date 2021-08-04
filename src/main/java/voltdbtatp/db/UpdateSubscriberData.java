@@ -27,19 +27,18 @@ import org.voltdb.SQLStmt;
 import org.voltdb.VoltProcedure;
 import org.voltdb.VoltTable;
 
-
 public class UpdateSubscriberData extends VoltProcedure {
 
-	public static final SQLStmt updateSub = new SQLStmt("UPDATE Subscriber SET bit_1 = ? WHERE s_id = ?;");
-	public static final SQLStmt updateSF = new SQLStmt("UPDATE Special_Facility SET data_a = ? WHERE s_id = ? AND sf_type = ?;");
-     
+    public static final SQLStmt updateSub = new SQLStmt("UPDATE Subscriber SET bit_1 = ? WHERE s_id = ?;");
+    public static final SQLStmt updateSF = new SQLStmt(
+            "UPDATE Special_Facility SET data_a = ? WHERE s_id = ? AND sf_type = ?;");
 
-	public VoltTable[] run(long subscriberId, long bit1, long dataA, long sfType) throws VoltAbortException {
+    public VoltTable[] run(long subscriberId, long bit1, long dataA, long sfType) throws VoltAbortException {
 
-		voltQueueSQL(updateSub, bit1, subscriberId);
-		voltQueueSQL(updateSF, dataA, subscriberId, sfType);
+        voltQueueSQL(updateSub, bit1, subscriberId);
+        voltQueueSQL(updateSF, dataA, subscriberId, sfType);
 
-		return voltExecuteSQL(true);
-	}
+        return voltExecuteSQL(true);
+    }
 
 }

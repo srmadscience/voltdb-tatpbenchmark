@@ -31,42 +31,42 @@ import org.voltdb.VoltTable;
 
 public class InsertCallForwarding extends VoltProcedure {
 
-  public static final SQLStmt querySpecialFacility = new SQLStmt(
-      "SELECT sf_type FROM Special_Facility WHERE s_id = ? ORDER BY sf_type;");
+    public static final SQLStmt querySpecialFacility = new SQLStmt(
+            "SELECT sf_type FROM Special_Facility WHERE s_id = ? ORDER BY sf_type;");
 
-  public static final SQLStmt delCallForwarding = new SQLStmt(
-      "DELETE FROM Call_Forwarding WHERE s_id = ? AND sf_type = ?  AND start_time = ?;");
+    public static final SQLStmt delCallForwarding = new SQLStmt(
+            "DELETE FROM Call_Forwarding WHERE s_id = ? AND sf_type = ?  AND start_time = ?;");
 
-  public static final SQLStmt insertCallForwarding = new SQLStmt(
-      "INSERT INTO call_forwarding (s_id,sf_type,start_time,end_time,numberx ) VALUES (?,?,?,?,?);");
+    public static final SQLStmt insertCallForwarding = new SQLStmt(
+            "INSERT INTO call_forwarding (s_id,sf_type,start_time,end_time,numberx ) VALUES (?,?,?,?,?);");
 
-  public VoltTable[] run(long subscriberId, long bit1, long dataA, long sfType) throws VoltAbortException {
+    public VoltTable[] run(long subscriberId, long bit1, long dataA, long sfType) throws VoltAbortException {
 
-    Random r = getSeededRandomNumberGenerator();
+        Random r = getSeededRandomNumberGenerator();
 
-    voltQueueSQL(querySpecialFacility, subscriberId);
+        voltQueueSQL(querySpecialFacility, subscriberId);
 
-    VoltTable[] firstOne = voltExecuteSQL();
-    if (firstOne[0].advanceRow()) {
-      long sftype = firstOne[0].getLong("sf_type");
+        VoltTable[] firstOne = voltExecuteSQL();
+        if (firstOne[0].advanceRow()) {
+            long sftype = firstOne[0].getLong("sf_type");
 
-      int j = r.nextInt(4);
+            int j = r.nextInt(4);
 
-      int startTime = 0;
+            int startTime = 0;
 
-      if (j == 1) {
-        startTime = 8;
-      } else if (j == 2) {
-        startTime = 16;
-      }
+            if (j == 1) {
+                startTime = 8;
+            } else if (j == 2) {
+                startTime = 16;
+            }
 
-      int endTime = startTime + 1 + r.nextInt(24);
+            int endTime = startTime + 1 + r.nextInt(24);
 
-      voltQueueSQL(delCallForwarding, subscriberId, sftype, startTime);
-      voltQueueSQL(insertCallForwarding, subscriberId, sftype, startTime, endTime,
-          LoadSubscriber.makeRandString(LoadSubscriber.ALPHABET, r, 15));
+            voltQueueSQL(delCallForwarding, subscriberId, sftype, startTime);
+            voltQueueSQL(insertCallForwarding, subscriberId, sftype, startTime, endTime,
+                    LoadSubscriber.makeRandString(LoadSubscriber.ALPHABET, r, 15));
+        }
+        return voltExecuteSQL(true);
     }
-    return voltExecuteSQL(true);
-  }
 
 }
