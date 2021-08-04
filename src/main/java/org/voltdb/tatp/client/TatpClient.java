@@ -88,15 +88,18 @@ public class TatpClient implements Runnable {
             + "      msc_location BIGINT, vlr_location BIGINT);"
 
             , "PARTITION TABLE subscriber ON COLUMN s_id;"
+            
+            , "create ASSUMEUNIQUE index sub_idx on subscriber(sub_nbr);"
+
 
             , "CREATE TABLE subscriber_nbr_map "
                     + "      ( sub_nbr VARCHAR(15) NOT NULL PRIMARY KEY, s_id BIGINT NOT NULL);"
 
-            , "PARTITION TABLE subscriber_nbr_map ON COLUMN sub_nbr;"
+                    , "PARTITION TABLE subscriber_nbr_map ON COLUMN sub_nbr;"
 
-            , "create ASSUMEUNIQUE index sub_idx on subscriber(sub_nbr);"
+                    , "CREATE INDEX subscriber_nbr_map_ix1 ON subscriber_nbr_map (sub_nbr);"
 
-            ,
+                               ,
             "CREATE TABLE access_info " + "      (s_id BIGINT NOT NULL, ai_type TINYINT NOT NULL, "
                     + "      data1 SMALLINT, data2 SMALLINT, data3 VARCHAR(3), data4 VARCHAR(5), "
                     + "      PRIMARY KEY (s_id, ai_type), " + "      FOREIGN KEY (s_id) REFERENCES subscriber (s_id));",
@@ -149,7 +152,8 @@ public class TatpClient implements Runnable {
 
             ,
             "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.InsertCallForwardingMultiPartition;",
-            "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.DeleteCallForwardingMultiPartition;" };
+            "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.DeleteCallForwardingMultiPartition;" ,
+            "CREATE PROCEDURE FROM CLASS voltdbtatp.db.UpdateSubNbr;"};
 
     // We only create the DDL and procedures if a call to testProcName with
     // testParams fails....
