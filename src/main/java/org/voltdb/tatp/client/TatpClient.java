@@ -809,14 +809,7 @@ public class TatpClient implements Runnable {
 
         if (choice >= 31 && choice <= 36) {
             return GET_ACCESS_DATA;
-        }
-        
-        // If using FKMODE_CACHED_ANSWER change subscriber ID 
-        // every now and then
-        if (choice == 37 && fkMode == FKMODE_CACHED_ANSWER) {
-            return UPDATE_SUBSCRIBER_NBR;
-        }
-        
+        }        
 
         return GET_SUBSCRIBER_DATA;
     }
