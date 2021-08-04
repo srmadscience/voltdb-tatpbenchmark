@@ -37,11 +37,11 @@ public class UpdateSubNbr extends VoltProcedure {
 
     public VoltTable[] run(long s_id, String newSubNumber) throws VoltAbortException {
 
-        // All of these statements will excecute as one ACID transaction...
+        // All of these statements will execute as one ACID transaction...
 
-        voltQueueSQL(updateSubNbrInSubscriber, newSubNumber, s_id);
-        voltQueueSQL(deleteOldSubNbrMapping, s_id);
-        voltQueueSQL(insertNewSubNbrMapping, newSubNumber, s_id);
+        voltQueueSQL(updateSubNbrInSubscriber, EXPECT_ONE_ROW, newSubNumber, s_id);
+        voltQueueSQL(deleteOldSubNbrMapping, EXPECT_ONE_ROW, s_id);
+        voltQueueSQL(insertNewSubNbrMapping, EXPECT_ONE_ROW, newSubNumber, s_id);
 
         return voltExecuteSQL(true);
     }

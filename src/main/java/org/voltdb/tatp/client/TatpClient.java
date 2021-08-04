@@ -59,6 +59,7 @@ public class TatpClient implements Runnable {
     public static final int UPDATE_LOCATION = 4;
     public static final int INSERT_CALL_FORWARDING = 5;
     public static final int DELETE_CALL_FORWARDING = 6;
+    public static final int UPDATE_SUBSCRIBER_NBR = 7;
 
     // How we're handling FK lookups
     public static final int FKMODE_QUERY_ALL_PARTITIONS_FIRST = 0;
@@ -97,7 +98,7 @@ public class TatpClient implements Runnable {
 
                     , "PARTITION TABLE subscriber_nbr_map ON COLUMN sub_nbr;"
 
-                    , "CREATE INDEX subscriber_nbr_map_ix1 ON subscriber_nbr_map (sub_nbr);"
+                    , "CREATE ASSUMEUNIQUE INDEX subscriber_nbr_map_ix1 ON subscriber_nbr_map (s_id);"
 
                                ,
             "CREATE TABLE access_info " + "      (s_id BIGINT NOT NULL, ai_type TINYINT NOT NULL, "
@@ -696,6 +697,15 @@ public class TatpClient implements Runnable {
 
                 break;
 
+            case UPDATE_SUBSCRIBER_NBR:
+             
+                             
+                theCallback = new BaseCallback(START_TIME, START_TIME_NANOS, sid, "UPDATE_SUBSCRIBER_NBR",
+                        callbackClient, true);
+                client.callProcedure(theCallback, "UpdateSubNbr", sid, getRandomlyChangedSubNumber(sid));
+
+                break;
+                
             default:
                 break;
             }
@@ -708,6 +718,10 @@ public class TatpClient implements Runnable {
 
         h.reportLatency(mapTypeToString(txnType) + "_INVOKE_MS", START_TIME, "", 1000);
 
+    }
+
+    private String getRandomlyChangedSubNumber(int sid) {
+        return getFkString(sid)+"_"+r.nextInt(10);
     }
 
     private String getFkString(int sid) {
@@ -796,6 +810,13 @@ public class TatpClient implements Runnable {
         if (choice >= 31 && choice <= 36) {
             return GET_ACCESS_DATA;
         }
+        
+        // If using FKMODE_CACHED_ANSWER change subscriber ID 
+        // every now and then
+        if (choice == 37 && fkMode == FKMODE_CACHED_ANSWER) {
+            return UPDATE_SUBSCRIBER_NBR;
+        }
+        
 
         return GET_SUBSCRIBER_DATA;
     }
