@@ -31,7 +31,7 @@ public class UpdateSubNbr extends VoltProcedure {
 
     public static final SQLStmt updateSubNbrInSubscriber = new SQLStmt(
             "update subscriber set sub_nbr = ? where s_id = ? ;");
-    public static final SQLStmt deleteOldSubNbrMapping = new SQLStmt("delete subscriber_nbr_map where s_id = ?;");
+    public static final SQLStmt deleteOldSubNbrMapping = new SQLStmt("delete from subscriber_nbr_map where s_id = ?;");
     public static final SQLStmt insertNewSubNbrMapping = new SQLStmt(
             "insert into subscriber_nbr_map (sub_nbr, s_id ) values (?,?);");
 
