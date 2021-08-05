@@ -33,6 +33,7 @@ public class Reset extends VoltProcedure {
     public static final SQLStmt d2 = new SQLStmt("DELETE FROM access_info;");
     public static final SQLStmt d3 = new SQLStmt("DELETE FROM subscriber;");
     public static final SQLStmt d4 = new SQLStmt("DELETE FROM call_forwarding ;");
+    public static final SQLStmt d5 = new SQLStmt("DELETE FROM subscriber_nbr_map ;");
 
     public VoltTable[] run() throws VoltAbortException {
 
@@ -40,6 +41,7 @@ public class Reset extends VoltProcedure {
         voltQueueSQL(d2);
         voltQueueSQL(d3);
         voltQueueSQL(d4);
+        voltQueueSQL(d5);
 
         return voltExecuteSQL(true);
     }
