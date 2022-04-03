@@ -12,18 +12,19 @@
 		<maven.compiler.source>1.8</maven.compiler.source>
 	</properties>
 	<dependencies>
-		<!-- https://mvnrepository.com/artifact/org.voltdb/voltdbclient -->
+	
 		<dependency>
 			<groupId>org.voltdb</groupId>
 			<artifactId>voltdbclient</artifactId>
-			<version>9.1.1</version>
+			<version>11.4</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.voltdb/voltdb -->
+		
 		<dependency>
 			<groupId>org.voltdb</groupId>
 			<artifactId>voltdb</artifactId>
-			<version>9.1.1</version>
+			<version>11.4</version>
 		</dependency>
+
 		<!-- https://mvnrepository.com/artifact/com.jezhumble.javasysmon/javasysmon -->
 		<dependency>
 			<groupId>com.danielflower.apprunner</groupId>

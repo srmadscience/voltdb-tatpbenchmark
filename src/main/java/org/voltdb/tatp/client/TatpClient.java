@@ -66,6 +66,7 @@ public class TatpClient implements Runnable {
     public static final int FKMODE_TASK_ALL_PARTITIONS = 1;
     public static final int FKMODE_MULTI_QUERY_FIRST = 2;
     public static final int FKMODE_CACHED_ANSWER = 3;
+    public static final int FKMODE_COMPOUND_PROCS = 4;
 
     // How long we wait between passes
     private static final long DELAY_SECONDS = 5;
@@ -89,18 +90,17 @@ public class TatpClient implements Runnable {
             + "      msc_location BIGINT, vlr_location BIGINT);"
 
             , "PARTITION TABLE subscriber ON COLUMN s_id;"
-            
-            , "create ASSUMEUNIQUE index sub_idx on subscriber(sub_nbr);"
 
+            , "create ASSUMEUNIQUE index sub_idx on subscriber(sub_nbr);"
 
             , "CREATE TABLE subscriber_nbr_map "
                     + "      ( sub_nbr VARCHAR(15) NOT NULL PRIMARY KEY, s_id BIGINT NOT NULL);"
 
-                    , "PARTITION TABLE subscriber_nbr_map ON COLUMN sub_nbr;"
+            , "PARTITION TABLE subscriber_nbr_map ON COLUMN sub_nbr;"
 
-                    , "CREATE ASSUMEUNIQUE INDEX subscriber_nbr_map_ix1 ON subscriber_nbr_map (s_id);"
+            , "CREATE ASSUMEUNIQUE INDEX subscriber_nbr_map_ix1 ON subscriber_nbr_map (s_id);"
 
-                               ,
+            ,
             "CREATE TABLE access_info " + "      (s_id BIGINT NOT NULL, ai_type TINYINT NOT NULL, "
                     + "      data1 SMALLINT, data2 SMALLINT, data3 VARCHAR(3), data4 VARCHAR(5), "
                     + "      PRIMARY KEY (s_id, ai_type), " + "      FOREIGN KEY (s_id) REFERENCES subscriber (s_id));",
@@ -132,7 +132,8 @@ public class TatpClient implements Runnable {
             , "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.GetNewDestination;"
 
             , "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.GetSubscriberData;"
-
+            , "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.UpdateSubscriberData;"
+            
             ,
             "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.InsertCallForwarding;"
 
@@ -141,7 +142,11 @@ public class TatpClient implements Runnable {
             , "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.UpdateLocation;"
 
             ,
-            "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.UpdateSubscriberData;"
+            "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.UpdateLocationCompound;"
+            ,
+            "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.InsertCallForwardingCompound;"
+            ,
+            "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.DeleteCallForwardingCompound;"
 
             , "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id "
                     + "FROM CLASS voltdbtatp.db.MapSubStringToNumberAllPartitions; "
@@ -153,8 +158,8 @@ public class TatpClient implements Runnable {
 
             ,
             "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.InsertCallForwardingMultiPartition;",
-            "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.DeleteCallForwardingMultiPartition;" ,
-            "CREATE PROCEDURE FROM CLASS voltdbtatp.db.UpdateSubNbr;"};
+            "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.DeleteCallForwardingMultiPartition;",
+            "CREATE PROCEDURE FROM CLASS voltdbtatp.db.UpdateSubNbr;" };
 
     // We only create the DDL and procedures if a call to testProcName with
     // testParams fails....
@@ -600,6 +605,10 @@ public class TatpClient implements Runnable {
                 // FKMODE_MULTI_QUERY_FIRST does a global read to map the FK to an ID and then
                 // creates a new callback
                 // to do the work when it has a valid ID.
+                //
+                // FKMODE_CACHED_ANSWER uses a two step process involving a lookup table partitioned on the FK.
+                // 
+                // FKMODE_COMPOUND_PROCS uses a compound procedure to merge the two steps in FKMODE_CACHED_ANSWER
 
                 if (fkMode == FKMODE_QUERY_ALL_PARTITIONS_FIRST) {
                     theMPCallback = new UpdateLocationInvokerCallbackNoView(START_TIME, START_TIME_NANOS, sid,
@@ -628,6 +637,14 @@ public class TatpClient implements Runnable {
                             "UPDATE_LOCATION", getRandomLocation(), callbackClient);
 
                     client.callProcedure(theCallback, "SUBSCRIBER_NBR_MAP.select", fkString);
+
+                } else if (fkMode == FKMODE_COMPOUND_PROCS) {
+
+                    theCallback = new BaseCallback(START_TIME, START_TIME_NANOS, sid, "UPDATE_LOCATION", callbackClient,
+                            true);
+                    client.callProcedure(theCallback, "UpdateLocationCompound", fkString, getRandomLocation());
+
+                    break;
 
                 }
 
@@ -662,6 +679,14 @@ public class TatpClient implements Runnable {
                             getRandomSfType());
                     client.callProcedure(theCallback, "SUBSCRIBER_NBR_MAP.select", fkString);
 
+                } else if (fkMode == FKMODE_COMPOUND_PROCS) {
+                    
+                    theCallback = new BaseCallback(START_TIME, START_TIME_NANOS, sid, "INSERT_CALL_FORWARDING", callbackClient,
+                            true);
+                    client.callProcedure(theCallback, "InsertCallForwardingCompound", fkString, getRandomBit(), getRandomDataA(),
+                            getRandomSfType() );
+                    
+
                 }
 
                 break;
@@ -693,19 +718,25 @@ public class TatpClient implements Runnable {
                     theCallback = new DeleteCallForwardingInvokerCallback(START_TIME, START_TIME_NANOS, sid,
                             "DELETE_CALL_FORWARDING", callbackClient, getStartTime(), getRandomSfType());
                     client.callProcedure(theCallback, "SUBSCRIBER_NBR_MAP.select", fkString);
+                    
+                } else if (fkMode == FKMODE_COMPOUND_PROCS) {
+                    
+                    theCallback = new BaseCallback(START_TIME, START_TIME_NANOS, sid, "DELETE_CALL_FORWARDING", callbackClient,
+                            true);
+                    client.callProcedure(theCallback, "DeleteCallForwardingCompound", fkString,  getRandomSfType(),getStartTime());
+
                 }
 
                 break;
 
             case UPDATE_SUBSCRIBER_NBR:
-             
-                             
+
                 theCallback = new BaseCallback(START_TIME, START_TIME_NANOS, sid, "UPDATE_SUBSCRIBER_NBR",
                         callbackClient, true);
                 client.callProcedure(theCallback, "UpdateSubNbr", sid, getRandomlyChangedSubNumber(sid));
 
                 break;
-                
+
             default:
                 break;
             }
@@ -721,7 +752,7 @@ public class TatpClient implements Runnable {
     }
 
     private String getRandomlyChangedSubNumber(int sid) {
-        return getFkString(sid)+"_"+r.nextInt(10);
+        return getFkString(sid) + "_" + r.nextInt(10);
     }
 
     private String getFkString(int sid) {
@@ -809,7 +840,7 @@ public class TatpClient implements Runnable {
 
         if (choice >= 31 && choice <= 36) {
             return GET_ACCESS_DATA;
-        }        
+        }
 
         return GET_SUBSCRIBER_DATA;
     }
@@ -1230,6 +1261,9 @@ public class TatpClient implements Runnable {
             break;
         case FKMODE_CACHED_ANSWER:
             description = "FKMODE_CACHED_ANSWER";
+            break;
+        case FKMODE_COMPOUND_PROCS:
+            description = "FKMODE_COMPOUND_PROCS";
             break;
 
         }
