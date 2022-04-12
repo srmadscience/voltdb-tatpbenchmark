@@ -194,6 +194,11 @@ From a VoltDB viewpoint our design choices were discussed above. We implemented 
 
 - &quot;FKMODE_TASK_ALL_PARTITIONS&quot; cuts out the middleman and asks each partition independently to try and update the row. Given that there is only one row and while the Unique ID is volatile it doesn&#39;t get reused this will work for this specific Use Case.
 
+- &quot;FKMODE_CACHED_ANSWER&quot; does a lookup and then a separate update once it knows the location of the row.
+
+- &quot;FKMODE_COMPOUND_PROCS&quot; uses a compound procedure to do a lookup and update in one network trip.
+
+
 ## What our benchmark does
 
 Our code stats by creating the test data if needed. It then runs our version of the benchmark for each implementation for 5 minutes. It starts at 2,000 TPS and then re-runs with 4,000, 6,000 , etc until the server can no longer get \&gt; 90% of requested transactions done or we hit some other reasons for stopping. We then look at the previous file and use the TPS it did as the result for that configuration. It does this for each of the three methods we discuss above. We produce an output log file which has detailed statistics for 1 of the 10 threads.
