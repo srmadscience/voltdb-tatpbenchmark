@@ -131,9 +131,9 @@ public class TatpClient implements Runnable {
 
             , "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.GetNewDestination;"
 
-            , "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.GetSubscriberData;"
-            , "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.UpdateSubscriberData;"
-            
+            , "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.GetSubscriberData;",
+            "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.UpdateSubscriberData;"
+
             ,
             "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.InsertCallForwarding;"
 
@@ -141,16 +141,8 @@ public class TatpClient implements Runnable {
 
             , "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.UpdateLocation;"
 
-            ,
-//            "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.UpdateLocationCompound;"
-//            ,
-//            "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.InsertCallForwardingCompound;"
-//            ,
-//            "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.DeleteCallForwardingCompound;"
-            "CREATE  PROCEDURE  FROM CLASS voltdbtatp.db.UpdateLocationCompound;"
-            ,
-            "CREATE  PROCEDURE  FROM CLASS voltdbtatp.db.InsertCallForwardingCompound;"
-            ,
+            , "CREATE  PROCEDURE  FROM CLASS voltdbtatp.db.UpdateLocationCompound;",
+            "CREATE  PROCEDURE  FROM CLASS voltdbtatp.db.InsertCallForwardingCompound;",
             "CREATE  PROCEDURE  FROM CLASS voltdbtatp.db.DeleteCallForwardingCompound;"
 
             , "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id "
@@ -611,9 +603,11 @@ public class TatpClient implements Runnable {
                 // creates a new callback
                 // to do the work when it has a valid ID.
                 //
-                // FKMODE_CACHED_ANSWER uses a two step process involving a lookup table partitioned on the FK.
-                // 
-                // FKMODE_COMPOUND_PROCS uses a compound procedure to merge the two steps in FKMODE_CACHED_ANSWER
+                // FKMODE_CACHED_ANSWER uses a two step process involving a lookup table
+                // partitioned on the FK.
+                //
+                // FKMODE_COMPOUND_PROCS uses a compound procedure to merge the two steps in
+                // FKMODE_CACHED_ANSWER
 
                 if (fkMode == FKMODE_QUERY_ALL_PARTITIONS_FIRST) {
                     theMPCallback = new UpdateLocationInvokerCallbackNoView(START_TIME, START_TIME_NANOS, sid,
@@ -647,8 +641,8 @@ public class TatpClient implements Runnable {
 
                     theCallback = new BaseCallback(START_TIME, START_TIME_NANOS, sid, "UPDATE_LOCATION", callbackClient,
                             true);
-                   client.callProcedure(theCallback, "UpdateLocationCompound", fkString, getRandomLocation());
-                   break;
+                    client.callProcedure(theCallback, "UpdateLocationCompound", fkString, getRandomLocation());
+                    break;
 
                 }
 
@@ -684,12 +678,11 @@ public class TatpClient implements Runnable {
                     client.callProcedure(theCallback, "SUBSCRIBER_NBR_MAP.select", fkString);
 
                 } else if (fkMode == FKMODE_COMPOUND_PROCS) {
-                    
-                    theCallback = new BaseCallback(START_TIME, START_TIME_NANOS, sid, "INSERT_CALL_FORWARDING", callbackClient,
-                            true);
-                    client.callProcedure(theCallback, "InsertCallForwardingCompound", fkString, getRandomBit(), getRandomDataA(),
-                            getRandomSfType() );
-                    
+
+                    theCallback = new BaseCallback(START_TIME, START_TIME_NANOS, sid, "INSERT_CALL_FORWARDING",
+                            callbackClient, true);
+                    client.callProcedure(theCallback, "InsertCallForwardingCompound", fkString, getRandomBit(),
+                            getRandomDataA(), getRandomSfType());
 
                 }
 
@@ -722,12 +715,13 @@ public class TatpClient implements Runnable {
                     theCallback = new DeleteCallForwardingInvokerCallback(START_TIME, START_TIME_NANOS, sid,
                             "DELETE_CALL_FORWARDING", callbackClient, getStartTime(), getRandomSfType());
                     client.callProcedure(theCallback, "SUBSCRIBER_NBR_MAP.select", fkString);
-                    
+
                 } else if (fkMode == FKMODE_COMPOUND_PROCS) {
-                    
-                    theCallback = new BaseCallback(START_TIME, START_TIME_NANOS, sid, "DELETE_CALL_FORWARDING", callbackClient,
-                            true);
-                    client.callProcedure(theCallback, "DeleteCallForwardingCompound", fkString,  getRandomSfType(),getStartTime());
+
+                    theCallback = new BaseCallback(START_TIME, START_TIME_NANOS, sid, "DELETE_CALL_FORWARDING",
+                            callbackClient, true);
+                    client.callProcedure(theCallback, "DeleteCallForwardingCompound", fkString, getRandomSfType(),
+                            getStartTime());
 
                 }
 
