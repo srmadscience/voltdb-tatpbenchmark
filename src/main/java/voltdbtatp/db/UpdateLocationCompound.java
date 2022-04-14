@@ -27,7 +27,7 @@ import org.voltdb.VoltCompoundProcedure;
 import org.voltdb.client.ClientResponse;
 
 public class UpdateLocationCompound extends VoltCompoundProcedure {
-    
+
     static VoltLogger LOG = new VoltLogger("UpdateLocationCompound");
 
     String fkString = null;
@@ -42,33 +42,28 @@ public class UpdateLocationCompound extends VoltCompoundProcedure {
         this.newLocation = newLocation;
 
         // Build stages
-        newStageList(this::doLookups)
-        .then(this::doUpdates)
-        .build();
+        newStageList(this::doLookups).then(this::doUpdates).then(this::finish).build();
         return 0L;
     }
 
     // Invoke first stage procedures, lookups on different partitioning keys
     private void doLookups(ClientResponse[] unused) {
-   
         queueProcedureCall("SUBSCRIBER_NBR_MAP.select", fkString);
     }
 
     // Process results of first stage, i.e. lookups, and perform updates
     private void doUpdates(ClientResponse[] resp) {
-        
+
         boolean allGood = true;
 
         // Process response 0 = username
         ClientResponse resp0 = resp[0];
         if (resp0.getStatus() != ClientResponse.SUCCESS) {
-            
+
             abortProcedure(String.format("UpdateLocationCompound returned: %d", resp0.getStatus()));
-        }
-        else if (resp0.getResults().length > 0 && resp0.getResults()[0].advanceRow()) {
-            sid = (int) resp0.getResults()[0].getLong("S_ID"); 
-        }
-        else {
+        } else if (resp0.getResults().length > 0 && resp0.getResults()[0].advanceRow()) {
+            sid = (int) resp0.getResults()[0].getLong("S_ID");
+        } else {
             reportError(String.format("No user match found for fkString %d", fkString));
             allGood = false;
         }
@@ -77,13 +72,21 @@ public class UpdateLocationCompound extends VoltCompoundProcedure {
         if (allGood) {
             queueProcedureCall("UpdateLocation", sid, newLocation);
         }
-        
+
+    }
+
+    private void finish(ClientResponse[] resp) {
+
+        if (resp[0].getStatus() != ClientResponse.SUCCESS) {
+
+            abortProcedure(String.format("UpdateLocationCompound returned: %d", resp[0].getStatus()));
+        }
+
         completeProcedure(0L);
     }
 
-   
-
-    // Complete the procedure after reporting errors: check if we succeeded logging them
+    // Complete the procedure after reporting errors: check if we succeeded logging
+    // them
     private void completeWithErrors(ClientResponse[] resp) {
         for (ClientResponse r : resp) {
             if (r.getStatus() != ClientResponse.SUCCESS) {
@@ -94,16 +97,16 @@ public class UpdateLocationCompound extends VoltCompoundProcedure {
     }
 
     // Report execution errors to special topic. We:
-    // 1.  Change the stage list so as to abandon all incomplete stages
-    //     and set up a new final stage
-    // 2.  Queue up a request, to be executed after the
-    //     current stage, to update the special topic
+    // 1. Change the stage list so as to abandon all incomplete stages
+    // and set up a new final stage
+    // 2. Queue up a request, to be executed after the
+    // current stage, to update the special topic
     private void reportError(String message) {
+        System.out.println(message);
         if (!errorsReported) {
-            newStageList(this::completeWithErrors)
-                          .build();
+            newStageList(this::completeWithErrors).build();
             errorsReported = true;
         }
-       // queueProcedureCall("COOKIE_ERRORS.insert", cookieId, urlStr, message);
+        // queueProcedureCall("COOKIE_ERRORS.insert", cookieId, urlStr, message);
     }
 }

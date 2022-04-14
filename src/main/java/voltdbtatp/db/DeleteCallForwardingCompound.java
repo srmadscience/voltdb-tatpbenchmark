@@ -47,6 +47,7 @@ public class DeleteCallForwardingCompound extends VoltCompoundProcedure {
         // Build stages
         newStageList(this::doLookups)
         .then(this::doUpdates)
+        .then(this::finish)
         .build();
         return 0L;
     }
@@ -81,10 +82,19 @@ public class DeleteCallForwardingCompound extends VoltCompoundProcedure {
             queueProcedureCall("DeleteCallForwarding", sid, sfType,startTime);
         }
         
-        completeProcedure(0L);
     }
 
    
+    private void finish(ClientResponse[] resp) {
+
+        if (resp[0].getStatus() != ClientResponse.SUCCESS) {
+
+            abortProcedure(String.format("DeleteCallForwardingCompound returned: %d", resp[0].getStatus()));
+        }
+
+        completeProcedure(0L);
+    }
+
 
     // Complete the procedure after reporting errors: check if we succeeded logging them
     private void completeWithErrors(ClientResponse[] resp) {

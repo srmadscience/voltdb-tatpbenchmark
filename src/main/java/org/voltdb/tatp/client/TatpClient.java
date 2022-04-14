@@ -142,11 +142,16 @@ public class TatpClient implements Runnable {
             , "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.UpdateLocation;"
 
             ,
-            "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.UpdateLocationCompound;"
+//            "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.UpdateLocationCompound;"
+//            ,
+//            "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.InsertCallForwardingCompound;"
+//            ,
+//            "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.DeleteCallForwardingCompound;"
+            "CREATE  PROCEDURE  FROM CLASS voltdbtatp.db.UpdateLocationCompound;"
             ,
-            "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.InsertCallForwardingCompound;"
+            "CREATE  PROCEDURE  FROM CLASS voltdbtatp.db.InsertCallForwardingCompound;"
             ,
-            "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id FROM CLASS voltdbtatp.db.DeleteCallForwardingCompound;"
+            "CREATE  PROCEDURE  FROM CLASS voltdbtatp.db.DeleteCallForwardingCompound;"
 
             , "CREATE PROCEDURE PARTITION ON TABLE subscriber COLUMN s_id "
                     + "FROM CLASS voltdbtatp.db.MapSubStringToNumberAllPartitions; "
@@ -642,9 +647,8 @@ public class TatpClient implements Runnable {
 
                     theCallback = new BaseCallback(START_TIME, START_TIME_NANOS, sid, "UPDATE_LOCATION", callbackClient,
                             true);
-                    client.callProcedure(theCallback, "UpdateLocationCompound", fkString, getRandomLocation());
-
-                    break;
+                   client.callProcedure(theCallback, "UpdateLocationCompound", fkString, getRandomLocation());
+                   break;
 
                 }
 

@@ -49,6 +49,7 @@ public class InsertCallForwardingCompound extends VoltCompoundProcedure {
         // Build stages
         newStageList(this::doLookups)
         .then(this::doUpdates)
+        .then(this::finish)
         .build();
         return 0L;
     }
@@ -83,6 +84,15 @@ public class InsertCallForwardingCompound extends VoltCompoundProcedure {
             queueProcedureCall("InsertCallForwarding", sid,  bit1,  dataA,  sfType);
         }
         
+    }
+
+    private void finish(ClientResponse[] resp) {
+
+        if (resp[0].getStatus() != ClientResponse.SUCCESS) {
+
+            abortProcedure(String.format("InsertCallForwardingCompound returned: %d", resp[0].getStatus()));
+        }
+
         completeProcedure(0L);
     }
 
