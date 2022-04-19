@@ -28,7 +28,7 @@ What makes the TATP benchmark interesting is that fully 20% of the transactions 
 
 ## There is no &quot;Correct&quot; answer to the &quot;Alternative Unique Key&quot; Problem
 
-From an implementation perspective this is a non-trivial problem. It&#39;s not a VoltDB-specific problem. All horizontally sharded systems will have to make some awkward choices. The default list generally looks like this:
+From an implementation perspective this is a non-trivial problem. It&#39;s not a Volt-specific problem. All horizontally sharded systems will have to make some awkward choices. The default list generally looks like this:
 
 ### 1. Use a single, large server running a legacy RDBMS so you can do the search and write in one move.
 
@@ -41,11 +41,13 @@ In the example below the Primary Key lives on Node 1. We create an index entry w
 ![KV Store](https://github.com/srmadscience/voltdb-tatpbenchmark/blob/master/docs/KVStore.png "KV Store")
  
 
-This will work and scale well, but has two serious problems:
+This will work and scale well, but has two problems:
 
 - Both reads and writes are now a two step process. There are a whole series of edge case scenarios where (for example) reads can&#39;t find a row that exists because they looked at the secondary index 500 microseconds too early. Depending on your application this may not matter. For the &quot;Telecom Application Transaction Processing&quot; Use Case we could probably get away with it, as the FK involves roaming users and it&#39;s hard for phone users  to change their roaming status multiple times per second.
 
-- The real problem is the complexity around error handling. What happens if one write works, but another fails? How do I &quot;uncorrupt&quot; the data? What do I do with incoming requests in the meantime? For these reasons we don&#39;t bother testing this in our implementation, although we might add this in a future iteration.
+- The real problem is the complexity around error handling. What happens if one write works, but another fails? How do I &quot;uncorrupt&quot; the data? What do I do with incoming requests in the meantime? What's interesting about TATP is that in all the cases where we need to do this we start with a read, and then do a write or another read. There is, for this subset of possible use cases, zero complexity to error handling. 
+
+- We explore two variations on this theme. 
 
 ### 3. Get your NewSQL/NoSQL store to do a global search, then do a write.
 
