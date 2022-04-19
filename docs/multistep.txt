@@ -1,0 +1,4 @@
+Client->(1)Database Node 1:check for alternative key on the \n node that owns the mapping
+Database Node 1->(1)Client: Send Primary Key that matches\n Alternative Unique Key back
+Client->(1)Database Node 2:Send request to update\n record using primary key
+Database Node 2->Client: Send results of Update\n to Client

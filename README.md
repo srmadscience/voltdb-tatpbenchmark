@@ -51,6 +51,8 @@ We explore two variations on this theme:
 
 FKMODE_CACHED_ANSWER uses a read only query to find the location, and then issues a call to the right location, with the logic to do this being implemented on the client side.
 
+
+
 FKMODE_COMPOUND_PROCS uses Volt's new Compound Procedure functionality to send a single message to Volt. On arrival we use a read only query to find the location, and then issue a call to the right location. All of this looks like a single trip to the server from the client's perspective.
 
 
