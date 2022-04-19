@@ -47,7 +47,13 @@ This will work and scale well, but has two problems:
 
 - The real problem is the complexity around error handling. What happens if one write works, but another fails? How do I &quot;uncorrupt&quot; the data? What do I do with incoming requests in the meantime? What's interesting about TATP is that in all the cases where we need to do this we start with a read, and then do a write or another read. There is, for this subset of possible use cases, zero complexity to error handling. 
 
-- We explore two variations on this theme. 
+We explore two variations on this theme:
+
+FKMODE_CACHED_ANSWER uses a read only query to find the location, and then issues a call to the right location, with the logic to do this being implemented on the client side.
+
+FKMODE_COMPOUND_PROCS uses Volt's new Compound Procedure functionality to send a single message to Volt. On arrival we use a read only query to find the location, and then issue a call to the right location. All of this looks like a single trip to the server from the client's perspective.
+
+
 
 ### 3. Get your NewSQL/NoSQL store to do a global search, then do a write.
 
