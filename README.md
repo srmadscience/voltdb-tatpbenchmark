@@ -1,4 +1,4 @@
-# VoltDB gets 66K TPS on the &quot;Telecom Application Transaction Processing&quot; benchmark
+# VoltDB gets >200K TPS on the &quot;Telecom Application Transaction Processing&quot; benchmark
 
 ## Introduction
 
@@ -243,7 +243,9 @@ Note that:
 
 ### Results
 
-The best result was obtained was when we asked all the partitions to do a read and then do an update once we&#39;ve found out where it is (FKMODE\_QUERY\_ALL\_PARTITIONS\_FIRST).  We were able to sustain 66,635 TPS while aiming for 68K. At that level the hardware wasn&#39;t maxed out, but the 99th percentile latency for our tricky &quot;Alternative Unique Key&quot; was still around 1ms. As we increased the workload it jumped to over 10ms, which is the point at which it will not be acceptable to customers.
+The best results were obtained with FKMODE_COMPOUND_PROCS and FKMODE_CACHED_ANSWER. In both cases we got to just over 200K TPS. FKMODE_COMPOUND_PROCS directs a lot of activity to the MPI, so it was, in practice, constrained by the available CPU on that one node.
+
+The next best result was obtained was when we asked all the partitions to do a read and then do an update once we&#39;ve found out where it is (FKMODE\_QUERY\_ALL\_PARTITIONS\_FIRST).  We were able to sustain 66,635 TPS while aiming for 68K. At that level the hardware wasn&#39;t maxed out, but the 99th percentile latency for our tricky &quot;Alternative Unique Key&quot; was still around 1ms. As we increased the workload it jumped to over 10ms, which is the point at which it will not be acceptable to customers.
 
 The next best alternative for the &quot;Alternative Unique Key&quot; stuff is to ask all the partitions to try and do it. We were able to get 27,518 TPS by the time latency reached 10ms. This does, however, have the advantage of not having to worry about updates.
 
