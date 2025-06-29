@@ -1,0 +1,104 @@
+#!/bin/sh
+
+TST=$1
+DIRNAME=$2
+
+CT=5000
+
+FNAME=../results/${DIRNAME}/stats_${TST}.csv
+
+	/bin/echo -n "" > $FNAME
+
+for MODE in FKMODE_COMPOUND_PROCS FKMODE_CACHED_ANSWER MULTI_QUERY_FIRST ALL_PARTITIONS_TASKED ALL_PARTITIONS_FIRST
+do
+	/bin/echo -n CPU_Requested,CPU_Got, >> $FNAME
+
+	for FD in GET_SUBSCRIBER_DATA_WALL_MILLIS GET_NEW_DESTINATION_WALL_MILLIS GET_ACCESS_DATA_WALL_MILLIS UPDATE_SUBSCRIBER_DATA_WALL_MILLIS UPDATE_LOCATION_2_WALL_MILLIS INSERT_CALL_FORWARDING_2_WALL_MILLIS DELETE_CALL_FORWARDING_2_WALL_MILLIS UPDATE_LOCATION_WALL_MILLIS INSERT_CALL_FORWARDING_WALL_MILLIS DELETE_CALL_FORWARDING_WALL_MILLIS
+	do
+
+
+		/bin/echo -n ${MODE}_${FD}, >> $FNAME
+	done
+done
+
+echo "" >> $FNAME
+
+while
+	[ "$CT" -lt "430000" ]
+do
+	echo $CT
+
+
+	LEAD_MODE=FKMODE_CACHED_ANSWER
+
+	TFILE=../results/${DIRNAME}/${TST}*_${CT}_*${LEAD_MODE}*.dat
+
+	if
+		[ -r $TFILE ]
+	then
+
+		# Get TPS by adding each threads numbers
+		TPSLIST=`cat $TFILE | tail -20 | grep -v Extra | awk -FS '{ print $3 }' | sed '1,$s/=//'`
+		TPS=0
+		for t in $TPSLIST
+		do
+			TPS=`expr $TPS + $t`
+		done
+
+		/bin/echo -n $CT,$TPS, >>  $FNAME	
+
+		# Get other numbers for FKMODE_CACHED_ANSWER
+		for FD in GET_SUBSCRIBER_DATA_WALL_MILLIS GET_NEW_DESTINATION_WALL_MILLIS GET_ACCESS_DATA_WALL_MILLIS UPDATE_SUBSCRIBER_DATA_WALL_MILLIS UPDATE_LOCATION_2_WALL_MILLIS INSERT_CALL_FORWARDING_2_WALL_MILLIS DELETE_CALL_FORWARDING_2_WALL_MILLIS UPDATE_LOCATION_WALL_MILLIS INSERT_CALL_FORWARDING_WALL_MILLIS DELETE_CALL_FORWARDING_WALL_MILLIS
+		do
+
+			VAL=`grep $FD $TFILE | awk '{ print $13 }' | sed '1,$s/,//'`
+			/bin/echo -n $VAL, >>  $FNAME
+
+		done
+
+		# See if other matching files exist
+
+
+		for OF in FKMODE_COMPOUND_PROCS FKMODE_CACHED_ANSWER MULTI_QUERY_FIRST ALL_PARTITIONS_TASKED ALL_PARTITIONS_FIRST
+		do
+
+			OTHERFILE=`echo $TFILE | sed '1,$s/FKMODE_CACHED_ANSWER/'$OF'/'`
+
+			# Get TPS by adding each threads numbers
+			TPSLIST=`cat $OTHERFILE | tail -20 | grep -v Extra | awk -FS '{ print $3 }' | sed '1,$s/=//'`
+			TPS=0
+			for t in $TPSLIST
+			do
+				TPS=`expr $TPS + $t`
+			done
+
+			/bin/echo -n $CT,$TPS, >>  $FNAME	
+
+			for FD in GET_SUBSCRIBER_DATA_WALL_MILLIS GET_NEW_DESTINATION_WALL_MILLIS GET_ACCESS_DATA_WALL_MILLIS UPDATE_SUBSCRIBER_DATA_WALL_MILLIS UPDATE_LOCATION_2_WALL_MILLIS INSERT_CALL_FORWARDING_2_WALL_MILLIS DELETE_CALL_FORWARDING_2_WALL_MILLIS UPDATE_LOCATION_WALL_MILLIS INSERT_CALL_FORWARDING_WALL_MILLIS DELETE_CALL_FORWARDING_WALL_MILLIS
+			do
+
+				VAL=""
+
+				if
+					[ -r "$OTHERFILE" ]
+				then
+					VAL=`grep $FD $OTHERFILE | awk '{ print $13 }' | sed '1,$s/,//'`
+				else
+					VAL=""	
+				fi
+	
+
+				/bin/echo -n $VAL, >> $FNAME
+						
+	
+			done
+
+
+		done
+	
+		echo "" >> $FNAME
+	fi
+
+
+	CT=`expr $CT + 5000`
+done

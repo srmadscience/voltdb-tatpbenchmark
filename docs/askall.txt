@@ -1,0 +1,10 @@
+
+Client->(1)Database Node 1:Tell to check for key and send answer ASAP\n without co-ordinating with other nodes.
+Client->(1)Database Node 2:Tell to check for key and send answer ASAP\n without co-ordinating with other nodes.
+note over Client,Database Node 2:We've asynchronously asked all the nodes to identify our \n Alternative Unique Key and are now waiting for an answer...
+Database Node 1->(1)Client: No Primary Key that matches\n Alternative Unique Key found
+Database Node 2->(1)Client: Matching Primary Key returned,\n which will map to node 1
+note over Client,Database Node 2:We now know where to send our request...
+Client->Database Node 1:Send Newly Obtained Primary key
+Database Node 1->Client:Return Record that matches this Primary Key.
+Client->Database Node 1: Send newly updated record

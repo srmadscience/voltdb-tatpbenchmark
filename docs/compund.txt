@@ -1,0 +1,8 @@
+
+Client->Database Coordinator Node:Send request to do an update\n using your Alternative Unique Key
+Database Coordinator Node->(1)Database Node 1:check for alternative key on the \n node that owns the mapping
+Database Node 1->(1)Database Coordinator Node: Send Primary Key that matches\n Alternative Unique Key back
+Database Coordinator Node->(1)Database Node 2:Send request to update\n record using primary key
+
+Database Node 2->(1)Database Coordinator Node: Send results of Update\n to Coordinator
+Database Coordinator Node->Client: Send results of Update\n to Client

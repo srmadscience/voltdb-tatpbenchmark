@@ -1,0 +1,10 @@
+note over Client,Database Node 2:Both of these inserts are launched\n asynchronously at the same time,\n and they succeed or fail independently. 
+Client->(1)Database Node 1:Insert new data record, organized by primary key
+Client->(1)Database Node 2:Insert new index record,\n organized by alternative unique key
+note over Client,Database Node 2:Once the records are in place updating\n is a five step process...
+Client->Database Node 2: Send Alternative Unique Key
+Database Node 2->Client: Return Primary Key that matches\n this Alternative Unique Key
+Client->Database Node 1: Send newly obtained Primary Key
+Database Node 1->Client: Return Record that matches this Primary Key.
+Client->Database Node 1: Send newly updated record
+
